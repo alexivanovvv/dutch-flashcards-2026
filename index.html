@@ -1343,6 +1343,22 @@ loadDeck();
 // Migrate older saved value 'match' → 'word'
 if (localStorage.getItem('dutch-section') === 'match') currentSection = 'word';
 switchSection(currentSection);
+
+// Preload every card image so flashcard flips and Picture Match feel instant
+function preloadAllImages() {
+  const seen = new Set();
+  for (const c of allCards) {
+    if (seen.has(c.file)) continue;
+    seen.add(c.file);
+    const img = new Image();
+    img.src = `card_images_updated/${encodeURIComponent(c.file)}.png`;
+  }
+}
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(preloadAllImages, { timeout: 1500 });
+} else {
+  setTimeout(preloadAllImages, 200);
+}
 </script>
 </body>
 </html>
