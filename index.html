@@ -123,10 +123,36 @@
   .section.active { display: flex; }
 
   /* ── Match game ─────────────────────────────────────────────────────────── */
-  .match-progress {
-    display: flex; align-items: center; gap: 14px;
-    width: 100%; max-width: 520px; margin-bottom: 20px;
+  .match-stats {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 22px;
   }
+  .match-stat {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 100px;
+    background: white; border: 1.5px solid #D8D3C8;
+    font-size: 0.95rem; font-weight: 700;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    line-height: 1;
+    transition: transform 0.18s;
+  }
+  .match-stat.bump { transform: scale(1.08); }
+  .match-stat-correct { color: #22C55E; }
+  .match-stat-wrong   { color: #EF4444; }
+  .match-stat svg { width: 16px; height: 16px; }
+  .match-reset {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid #D8D3C8; background: white;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    color: #6B6B6B;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .match-reset:hover { border-color: #1C1C1E; color: #1C1C1E; transform: rotate(-90deg); }
+  body.dark .match-stat  { background: #2C2C30; border-color: #444; }
+  body.dark .match-reset { background: #2C2C30; border-color: #444; color: #A0A0A8; }
+  body.dark .match-reset:hover { border-color: #E5E5E8; color: #E5E5E8; }
   .match-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -183,23 +209,14 @@
     60%      { transform: translateX(-3px); }
     80%      { transform: translateX(3px); }
   }
-  .match-done {
-    text-align: center;
-    padding: 40px 20px 16px;
-    width: 100%; max-width: 520px;
-  }
-  .match-done-title {
-    font-size: 1.6rem; font-weight: 800;
-    letter-spacing: -0.5px; margin-bottom: 6px;
-  }
-  .match-done-sub {
-    font-size: 0.9rem; color: #9E9E9E;
-    margin-bottom: 22px;
+  .match-item.fade-in { animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
   }
   body.dark .match-item { background: #2C2C30; border-color: #444; color: #E5E5E8; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
   body.dark .match-item:hover:not(.matched):not(.correct):not(.wrong) { border-color: #E5E5E8; }
   body.dark .match-item.selected { background: #E5E5E8; color: #1C1C1E; border-color: #E5E5E8; }
-  body.dark .match-done-sub { color: #666; }
 
   .cat-scroll {
     width: 100%; max-width: 620px;
@@ -463,22 +480,28 @@
 </div>
 
 <div class="section" id="section-match">
-  <div class="match-progress">
-    <span class="prog-num" id="match-prog-text">0 / 0</span>
-    <div class="prog-bar"><div class="prog-fill" id="match-prog-fill" style="width:0%"></div></div>
-  </div>
-  <div class="match-grid" id="match-grid"></div>
-  <div class="match-done" id="match-done" style="display:none">
-    <div class="match-done-title">Klaar! 🎉</div>
-    <div class="match-done-sub" id="match-done-sub">Alle paren gevonden</div>
-    <button class="shuffle-btn" onclick="startMatchRound()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+  <div class="match-stats">
+    <div class="match-stat match-stat-correct" id="stat-correct-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      <span id="stat-correct">0</span>
+    </div>
+    <div class="match-stat match-stat-wrong" id="stat-wrong-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+      <span id="stat-wrong">0</span>
+    </div>
+    <button class="match-reset" onclick="resetMatchStats()" title="Reset">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"/>
         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
       </svg>
-      Nieuwe ronde
     </button>
   </div>
+  <div class="match-grid" id="match-grid"></div>
 </div>
 
 <script>
@@ -795,95 +818,148 @@ function switchSection(name) {
   if (name === 'match') startMatchRound();
 }
 
-// ── Match game ─────────────────────────────────────────────────────────────
+// ── Match game (infinite) ──────────────────────────────────────────────────
 const MATCH_PAIRS = 5;
-let matchPairs = [];
-let matchSelected = null; // { side: 'nl'|'en', file: string, el: Element }
+let matchPool = [];          // queue of cards not currently on the board
+let matchActive = new Map(); // file -> { card, nlEl, enEl }
+let matchSelected = null;    // { side, file, el }
 let matchLocked = false;
-let matchedCount = 0;
+let correctCount = 0;
+let wrongCount = 0;
 
-function startMatchRound() {
+function uniqueCardsForCategory() {
   const source = activeCat === 'Alle' ? allCards : allCards.filter(c => c.cat === activeCat);
-  // Deduplicate by file so audio/keys stay unique within a round
   const uniq = [];
   const seen = new Set();
   for (const c of source) {
     if (!seen.has(c.file)) { seen.add(c.file); uniq.push(c); }
   }
-  const n = Math.min(MATCH_PAIRS, uniq.length);
-  matchPairs = shuffle(uniq).slice(0, n);
-  matchSelected = null;
-  matchLocked = false;
-  matchedCount = 0;
-  document.getElementById('match-done').style.display = 'none';
-  renderMatch();
-  updateMatchProgress();
+  return uniq;
 }
 
-function renderMatch() {
+function refillPool() {
+  const activeFiles = new Set([...matchActive.keys()]);
+  matchPool = shuffle(uniqueCardsForCategory().filter(c => !activeFiles.has(c.file)));
+}
+
+function nextFromPool() {
+  if (matchPool.length === 0) refillPool();
+  return matchPool.shift() || null;
+}
+
+function startMatchRound() {
+  matchSelected = null;
+  matchLocked = false;
+  matchActive = new Map();
+  const uniq = uniqueCardsForCategory();
+  matchPool = shuffle(uniq);
+  const n = Math.min(MATCH_PAIRS, uniq.length);
+  const initial = [];
+  for (let i = 0; i < n; i++) initial.push(matchPool.shift());
+  renderMatch(initial);
+  updateMatchStats();
+}
+
+function resetMatchStats() {
+  correctCount = 0;
+  wrongCount = 0;
+  startMatchRound();
+}
+
+function makeMatchButton(card, side) {
+  const b = document.createElement('button');
+  b.className = 'match-item fade-in';
+  b.dataset.side = side;
+  b.dataset.file = card.file;
+  b.textContent = side === 'nl'
+    ? (card.article ? `${card.article} ${card.word}` : card.word)
+    : card.en;
+  b.onclick = () => onMatchTap(b, card, side);
+  return b;
+}
+
+function renderMatch(cards) {
   const grid = document.getElementById('match-grid');
   grid.innerHTML = '';
-  if (matchPairs.length === 0) {
-    grid.innerHTML = '<div class="match-done-sub" style="grid-column:1/-1;text-align:center;padding:30px">Geen kaarten in deze categorie</div>';
+  if (cards.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#9E9E9E">Geen kaarten in deze categorie</div>';
     return;
   }
-  const nlCol = document.createElement('div');
-  nlCol.className = 'match-col';
-  const enCol = document.createElement('div');
-  enCol.className = 'match-col';
-
-  const nlOrder = shuffle(matchPairs);
-  const enOrder = shuffle(matchPairs);
-
+  const nlCol = document.createElement('div'); nlCol.className = 'match-col';
+  const enCol = document.createElement('div'); enCol.className = 'match-col';
+  const nlOrder = shuffle(cards);
+  const enOrder = shuffle(cards);
   nlOrder.forEach(c => {
-    const b = document.createElement('button');
-    b.className = 'match-item';
-    b.dataset.side = 'nl';
-    b.dataset.file = c.file;
-    b.textContent = c.article ? `${c.article} ${c.word}` : c.word;
-    b.onclick = () => onMatchTap(b, c, 'nl');
+    const b = makeMatchButton(c, 'nl');
     nlCol.appendChild(b);
+    if (!matchActive.has(c.file)) matchActive.set(c.file, { card: c });
+    matchActive.get(c.file).nlEl = b;
   });
   enOrder.forEach(c => {
-    const b = document.createElement('button');
-    b.className = 'match-item';
-    b.dataset.side = 'en';
-    b.dataset.file = c.file;
-    b.textContent = c.en;
-    b.onclick = () => onMatchTap(b, c, 'en');
+    const b = makeMatchButton(c, 'en');
     enCol.appendChild(b);
+    if (!matchActive.has(c.file)) matchActive.set(c.file, { card: c });
+    matchActive.get(c.file).enEl = b;
   });
-  grid.appendChild(nlCol);
-  grid.appendChild(enCol);
+  document.getElementById('match-grid').appendChild(nlCol);
+  document.getElementById('match-grid').appendChild(enCol);
+}
+
+function bumpStat(id) {
+  const el = document.getElementById(id);
+  el.classList.add('bump');
+  setTimeout(() => el.classList.remove('bump'), 200);
+}
+
+function updateMatchStats() {
+  document.getElementById('stat-correct').textContent = correctCount;
+  document.getElementById('stat-wrong').textContent   = wrongCount;
+}
+
+function replaceMatched(oldFile, oldNlEl, oldEnEl) {
+  matchActive.delete(oldFile);
+  const next = nextFromPool();
+  if (!next) {
+    // Nothing left — leave slots faded out
+    return;
+  }
+  // Reuse the existing DOM nodes in place so layout doesn't shift
+  matchActive.set(next.file, { card: next, nlEl: oldNlEl, enEl: oldEnEl });
+  [['nl', oldNlEl], ['en', oldEnEl]].forEach(([side, el]) => {
+    el.className = 'match-item fade-in';
+    el.dataset.file = next.file;
+    el.textContent = side === 'nl'
+      ? (next.article ? `${next.article} ${next.word}` : next.word)
+      : next.en;
+    el.onclick = () => onMatchTap(el, next, side);
+    // restart animation
+    void el.offsetWidth;
+  });
 }
 
 function onMatchTap(el, card, side) {
   if (matchLocked) return;
   if (el.classList.contains('matched') || el.classList.contains('correct')) return;
 
-  // Speak Dutch word on tap
   if (side === 'nl') speak(card);
 
-  // Toggle off if tapping same item again
   if (matchSelected && matchSelected.el === el) {
     el.classList.remove('selected');
     matchSelected = null;
     return;
   }
-  // If tapping another item on the same side, switch selection
   if (matchSelected && matchSelected.side === side) {
     matchSelected.el.classList.remove('selected');
     el.classList.add('selected');
     matchSelected = { side, file: card.file, el };
     return;
   }
-  // No selection yet → select
   if (!matchSelected) {
     el.classList.add('selected');
     matchSelected = { side, file: card.file, el };
     return;
   }
-  // Opposite side selected → check match
+
   const a = matchSelected;
   const b = { side, file: card.file, el };
   if (a.file === b.file) {
@@ -891,22 +967,30 @@ function onMatchTap(el, card, side) {
     a.el.classList.remove('selected');
     a.el.classList.add('correct');
     b.el.classList.add('correct');
+    correctCount++;
+    updateMatchStats();
+    bumpStat('stat-correct-box');
     setTimeout(() => {
       a.el.classList.remove('correct');
       b.el.classList.remove('correct');
       a.el.classList.add('matched');
       b.el.classList.add('matched');
-      matchedCount++;
-      updateMatchProgress();
-      matchSelected = null;
-      matchLocked = false;
-      if (matchedCount === matchPairs.length) onMatchComplete();
-    }, 480);
+      const entry = matchActive.get(a.file);
+      const nlEl = entry.nlEl, enEl = entry.enEl;
+      setTimeout(() => {
+        replaceMatched(a.file, nlEl, enEl);
+        matchSelected = null;
+        matchLocked = false;
+      }, 280);
+    }, 420);
   } else {
     matchLocked = true;
     a.el.classList.remove('selected');
     a.el.classList.add('wrong');
     b.el.classList.add('wrong');
+    wrongCount++;
+    updateMatchStats();
+    bumpStat('stat-wrong-box');
     setTimeout(() => {
       a.el.classList.remove('wrong');
       b.el.classList.remove('wrong');
@@ -914,19 +998,6 @@ function onMatchTap(el, card, side) {
       matchLocked = false;
     }, 480);
   }
-}
-
-function updateMatchProgress() {
-  const total = matchPairs.length;
-  document.getElementById('match-prog-text').textContent = `${matchedCount} / ${total}`;
-  const pct = total ? Math.round((matchedCount / total) * 100) : 0;
-  document.getElementById('match-prog-fill').style.width = pct + '%';
-}
-
-function onMatchComplete() {
-  document.getElementById('match-done').style.display = '';
-  document.getElementById('match-done-sub').textContent =
-    `Alle ${matchPairs.length} paren gevonden in "${activeCat}"`;
 }
 
 function showCard() {
