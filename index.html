@@ -4,12 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Nederlandse Woordkaarten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --accent: #22C55E;
+    --accent-soft: rgba(34,197,94,0.18);
+    --accent-glow: rgba(34,197,94,0.35);
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     background: #F0ECE4;
+    background-image:
+      radial-gradient(at 20% 0%, rgba(255,255,255,0.45), transparent 55%),
+      radial-gradient(at 80% 100%, rgba(255,255,255,0.30), transparent 55%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.025 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-attachment: fixed;
     color: #1C1C1E;
     min-height: 100vh;
     display: flex;
@@ -17,10 +30,14 @@
     align-items: center;
     padding: 28px 20px 48px;
     -webkit-font-smoothing: antialiased;
-    transition: background 0.25s, color 0.25s;
+    transition: background-color 0.25s, color 0.25s;
   }
   body.dark {
     background: #18181B;
+    background-image:
+      radial-gradient(at 20% 0%, rgba(255,255,255,0.05), transparent 55%),
+      radial-gradient(at 80% 100%, rgba(255,255,255,0.03), transparent 55%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
     color: #E5E5E8;
   }
 
@@ -89,8 +106,8 @@
     color: #1C1C1E;
   }
   body.dark .card-front { background: white; box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.5); }
-  body.dark .prog-bar { background: #333; }
-  body.dark .prog-fill { background: #E5E5E8; }
+  body.dark .prog-bar { background: #2C2C30; }
+  body.dark .prog-fill { background: linear-gradient(90deg, #E5E5E8 0%, var(--accent) 100%); }
   body.dark .arrow-btn { background: #2C2C30; border-color: #444; color: #A0A0A8; }
   body.dark .arrow-btn:hover { border-color: #E5E5E8; color: #E5E5E8; }
 
@@ -119,7 +136,84 @@
   body.dark .section-tab.active { background: #E5E5E8; color: #1C1C1E; }
 
   .section { display: none; flex-direction: column; align-items: center; width: 100%; }
-  .section.active { display: flex; }
+  .section.active {
+    display: flex;
+    animation: sectionEnter 0.28s cubic-bezier(0.2, 0.65, 0.3, 1);
+  }
+  @keyframes sectionEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Floating +1 / -1 microanimation on counter ─────────────────────────── */
+  .stat-pop {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.1rem; font-weight: 800;
+    pointer-events: none;
+    animation: statPop 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    z-index: 10;
+  }
+  .stat-pop.pop-correct { color: #22C55E; }
+  .stat-pop.pop-wrong   { color: #EF4444; }
+  @keyframes statPop {
+    0%   { opacity: 0; transform: translate(-50%, -10%) scale(0.6); }
+    25%  { opacity: 1; transform: translate(-50%, -90%) scale(1.1); }
+    100% { opacity: 0; transform: translate(-50%, -240%) scale(0.95); }
+  }
+  .match-stat { position: relative; }
+
+  /* ── Streak badge ───────────────────────────────────────────────────────── */
+  .match-streak {
+    display: none;
+    align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #FF8C42 0%, #F97316 100%);
+    color: white;
+    font-size: 0.84rem; font-weight: 800;
+    box-shadow: 0 3px 12px rgba(249,115,22,0.35);
+    animation: streakIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    letter-spacing: -0.1px;
+    line-height: 1;
+  }
+  .match-streak.show { display: inline-flex; }
+  @keyframes streakIn {
+    from { opacity: 0; transform: scale(0.6); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  /* ── Onboarding hint (one-time) ─────────────────────────────────────────── */
+  .onboarding-hint {
+    position: fixed;
+    left: 50%; transform: translateX(-50%);
+    bottom: 36px;
+    background: rgba(28, 28, 30, 0.92);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font-size: 0.86rem; font-weight: 600;
+    letter-spacing: -0.1px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 150;
+    animation: hintFade 4.2s ease forwards;
+    pointer-events: none;
+    max-width: calc(100% - 24px);
+    text-align: center;
+  }
+  @keyframes hintFade {
+    0%   { opacity: 0; transform: translate(-50%, 12px); }
+    8%   { opacity: 1; transform: translate(-50%, 0); }
+    85%  { opacity: 1; transform: translate(-50%, 0); }
+    100% { opacity: 0; transform: translate(-50%, -8px); }
+  }
+  body.dark .onboarding-hint {
+    background: rgba(245, 245, 248, 0.95);
+    color: #1C1C1E;
+  }
 
   /* ── Confirm modal ──────────────────────────────────────────────────────── */
   .modal-overlay {
@@ -377,13 +471,30 @@
     width: 100%; max-width: 560px; margin-bottom: 24px;
   }
   .prog-bar {
-    flex: 1; height: 3px; background: #D8D3C8;
-    border-radius: 2px; overflow: hidden;
+    flex: 1; height: 4px; background: #D8D3C8;
+    border-radius: 999px; overflow: hidden;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.06);
+    position: relative;
   }
   .prog-fill {
-    height: 100%; background: #1C1C1E;
-    border-radius: 2px; transition: width 0.35s ease;
+    height: 100%;
+    background: linear-gradient(90deg, #1C1C1E 0%, var(--accent) 100%);
+    border-radius: 999px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px rgba(34,197,94,0.35);
   }
+  .prog-dots {
+    display: flex; gap: 3px; flex-wrap: wrap;
+    margin-top: 4px; max-width: 560px; width: 100%;
+    justify-content: flex-start;
+    opacity: 0.55;
+  }
+  .prog-dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: #C0BAB0;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .prog-dot.seen { background: var(--accent); transform: scale(1.15); }
+  body.dark .prog-dot { background: #444; }
 
   .card-row {
     display: flex; align-items: center; gap: 18px;
@@ -464,10 +575,12 @@
       0 20px 40px rgba(0,0,0,0.2);
   }
   .back-word {
-    font-size: clamp(1.8rem, 5.5vw, 2.8rem);
+    font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
+    font-size: clamp(2rem, 6vw, 3rem);
     font-weight: 800; color: white;
     text-align: center; line-height: 1.05;
-    letter-spacing: -1px; margin-bottom: 18px;
+    letter-spacing: -1.5px; margin-bottom: 18px;
+    font-variation-settings: "opsz" 96;
   }
   .back-divider {
     width: 32px; height: 2px;
@@ -493,7 +606,7 @@
 
   /* ── Focus accessibility ───────────────────────────────────────────────── */
   button:focus-visible, .scene:focus-visible {
-    outline: 3px solid rgba(34, 197, 94, 0.5);
+    outline: 3px solid var(--accent-glow);
     outline-offset: 2px;
   }
 
@@ -611,6 +724,7 @@
   <div class="progress-row">
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
+  <div class="prog-dots" id="prog-dots"></div>
 
   <div class="card-row">
     <button class="arrow-btn" onclick="prevCard()">&#8592;</button>
@@ -655,6 +769,7 @@
       </svg>
       <span id="stat-wrong">0</span>
     </div>
+    <div class="match-streak" id="match-streak" title="Streak">🔥 <span id="streak-num">0</span></div>
     <button class="match-reset" onclick="resetMatchStats()" title="Reset">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"/>
@@ -881,6 +996,15 @@ let idx = parseInt(localStorage.getItem('dutch-idx') || '0', 10) || 0;
 let flipped = false;
 const activeCat = 'Alle';
 
+// Cards the user has flipped at least once (tracked across sessions)
+const seenCards = (() => {
+  try { return new Set(JSON.parse(localStorage.getItem('dutch-seen') || '[]')); }
+  catch { return new Set(); }
+})();
+function saveSeen() {
+  localStorage.setItem('dutch-seen', JSON.stringify([...seenCards]));
+}
+
 // ── Theme ──────────────────────────────────────────────────────────────────
 let darkMode = localStorage.getItem('dutch-dark') === '1';
 function applyTheme() {
@@ -981,6 +1105,7 @@ function switchSection(name) {
   document.getElementById('tab-word').classList.toggle('active',    name === 'word');
   document.getElementById('tab-picture').classList.toggle('active', name === 'picture');
   if (isMatch) startMatchRound();
+  showOnboardingHint(name);
 }
 
 // ── Match game ─────────────────────────────────────────────────────────────
@@ -1097,7 +1222,27 @@ async function resetMatchStats() {
   if (!ok) return;
   correctCount = 0;
   wrongCount = 0;
+  matchStreak = 0;
   startMatchRound();
+}
+
+// ── One-time onboarding hint per section ──────────────────────────────────
+const HINTS = {
+  cards:   'Tap the card to flip · ← → to navigate',
+  word:    'Match the Dutch word with its English translation',
+  picture: 'Match the Dutch word with its picture',
+};
+function showOnboardingHint(section) {
+  const seenKey = 'dutch-hint-' + section;
+  if (localStorage.getItem(seenKey) === '1') return;
+  const text = HINTS[section];
+  if (!text) return;
+  const hint = document.createElement('div');
+  hint.className = 'onboarding-hint';
+  hint.textContent = text;
+  document.body.appendChild(hint);
+  setTimeout(() => hint.remove(), 4400);
+  localStorage.setItem(seenKey, '1');
 }
 
 function makeMatchButton(card, side) {
@@ -1159,11 +1304,30 @@ function bumpStat(id) {
   setTimeout(() => el.classList.remove('bump'), 200);
 }
 
+function popStat(id, text, kind) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const pop = document.createElement('span');
+  pop.className = 'stat-pop pop-' + kind;
+  pop.textContent = text;
+  el.appendChild(pop);
+  setTimeout(() => pop.remove(), 720);
+}
+
+// Session-only streak (resets on page reload or wrong match)
+let matchStreak = 0;
+function updateStreakBadge() {
+  const badge = document.getElementById('match-streak');
+  document.getElementById('streak-num').textContent = matchStreak;
+  badge.classList.toggle('show', matchStreak >= 3);
+}
+
 function updateMatchStats() {
   document.getElementById('stat-correct').textContent = correctCount;
   document.getElementById('stat-wrong').textContent   = wrongCount;
   localStorage.setItem('dutch-correct', String(correctCount));
   localStorage.setItem('dutch-wrong',   String(wrongCount));
+  updateStreakBadge();
 }
 
 function relocateInColumn(el) {
@@ -1247,8 +1411,10 @@ function onMatchTap(el, card, side) {
     a.el.classList.add('correct');
     b.el.classList.add('correct');
     correctCount++;
+    matchStreak++;
     updateMatchStats();
     bumpStat('stat-correct-box');
+    popStat('stat-correct-box', '+1', 'correct');
     playCorrect();
     setTimeout(() => {
       a.el.classList.add('matched');
@@ -1266,8 +1432,10 @@ function onMatchTap(el, card, side) {
     a.el.classList.add('wrong');
     b.el.classList.add('wrong');
     wrongCount++;
+    matchStreak = 0;
     updateMatchStats();
     bumpStatStrong('stat-wrong-box');
+    popStat('stat-wrong-box', '+1', 'wrong');
     playWrong();
     setTimeout(() => {
       a.el.classList.remove('wrong');
@@ -1292,6 +1460,24 @@ function flashGridWrong() {
   setTimeout(() => grid.classList.remove('flash-wrong'), 520);
 }
 
+function renderProgressDots() {
+  const el = document.getElementById('prog-dots');
+  if (!el) return;
+  if (deck.length === 0) { el.innerHTML = ''; return; }
+  // Build only when count changes
+  if (el.children.length !== deck.length) {
+    el.innerHTML = '';
+    for (let i = 0; i < deck.length; i++) {
+      const d = document.createElement('div');
+      d.className = 'prog-dot';
+      el.appendChild(d);
+    }
+  }
+  for (let i = 0; i < deck.length; i++) {
+    el.children[i].classList.toggle('seen', seenCards.has(deck[i].file));
+  }
+}
+
 function showCard() {
   const c = deck[idx];
   localStorage.setItem('dutch-idx', String(idx));
@@ -1302,6 +1488,7 @@ function showCard() {
   document.getElementById('example').textContent = c.ex;
   const pct = Math.round(((idx + 1) / deck.length) * 100);
   document.getElementById('prog-fill').style.width = pct + '%';
+  renderProgressDots();
   flipped = false;
   document.getElementById('card').classList.remove('flipped');
 }
@@ -1311,7 +1498,12 @@ function flipCard() {
   document.getElementById('card').classList.toggle('flipped');
   if (flipped) {
     const c = deck[idx];
-    setTimeout(() => speak(c), 300); // slight delay so flip starts first
+    if (!seenCards.has(c.file)) {
+      seenCards.add(c.file);
+      saveSeen();
+      renderProgressDots();
+    }
+    setTimeout(() => speak(c), 300);
   }
 }
 
