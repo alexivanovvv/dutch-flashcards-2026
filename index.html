@@ -151,8 +151,9 @@
     max-height: 80px;
     object-fit: contain;
   }
-  /* In picture mode, text buttons (NL side) match the height of image buttons */
-  .match-grid.image-mode .match-item:not(.has-image) {
+  /* In picture mode, force every button (text and image) to the same fixed height */
+  .match-grid.image-mode .match-item {
+    height: 96px;
     min-height: 96px;
   }
 
