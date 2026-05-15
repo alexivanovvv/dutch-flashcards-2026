@@ -160,13 +160,55 @@
   .match-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px 14px;
-    width: 100%; max-width: 520px;
+    gap: 10px 18px;
+    width: 100%; max-width: 540px;
     margin-bottom: 22px;
+    position: relative;
+  }
+  .match-grid::before {
+    content: '';
+    position: absolute;
+    top: 32px; bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #D8D3C8 18%, #D8D3C8 82%, transparent);
+    pointer-events: none;
+  }
+  body.dark .match-grid::before {
+    background: linear-gradient(to bottom, transparent, #444 18%, #444 82%, transparent);
   }
   .match-col {
     display: flex; flex-direction: column; gap: 10px;
   }
+  .match-col-header {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: #9E9E9E;
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+  }
+  .match-col-header .flag { font-size: 0.95rem; line-height: 1; }
+  body.dark .match-col-header { color: #777; }
+  .match-item[data-side="nl"] {
+    font-weight: 700;
+    border-left: 3px solid #FF6B35; /* NL accent */
+  }
+  .match-item[data-side="en"] {
+    font-weight: 500;
+    border-left: 3px solid #1E40AF; /* EN accent */
+    color: #4B5563;
+  }
+  .match-item[data-side="en"]:hover:not(.matched):not(.correct):not(.wrong) {
+    color: #1C1C1E;
+  }
+  body.dark .match-item[data-side="en"] { color: #A0A0A8; }
+  body.dark .match-item[data-side="en"]:hover:not(.matched):not(.correct):not(.wrong) { color: #E5E5E8; }
+  /* When selected / correct / wrong, override the side accent text color */
+  .match-item.selected,
+  .match-item.correct,
+  .match-item.wrong { color: white !important; }
+  body.dark .match-item.selected { color: #1C1C1E !important; }
   .match-item {
     padding: 16px 14px;
     border-radius: 14px;
@@ -711,7 +753,11 @@ const allCards = [
 ];
 
 const CATS = ['Alle', ...new Set(allCards.map(c => c.cat))];
-let deck = [], idx = 0, flipped = false, activeCat = 'Alle';
+const savedCat = localStorage.getItem('dutch-cat');
+let deck = [];
+let idx = parseInt(localStorage.getItem('dutch-idx') || '0', 10) || 0;
+let flipped = false;
+let activeCat = (savedCat && CATS.includes(savedCat)) ? savedCat : 'Alle';
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 let darkMode = localStorage.getItem('dutch-dark') === '1';
@@ -804,20 +850,28 @@ function renderCategories() {
   });
 }
 
-function selectCategory(cat) {
+function selectCategory(cat, opts = {}) {
+  const isInitial = !!opts.initial;
+  const sameCat = activeCat === cat;
   activeCat = cat;
+  localStorage.setItem('dutch-cat', cat);
   const source = cat === 'Alle' ? allCards : allCards.filter(c => c.cat === cat);
   deck = shuffle(source);
-  idx = 0;
+  if (!isInitial && !sameCat) {
+    idx = 0;
+    localStorage.setItem('dutch-idx', '0');
+  }
+  if (idx >= deck.length) idx = 0;
   renderCategories();
   showCard();
-  if (currentSection === 'match') startMatchRound();
+  if (!isInitial && currentSection === 'match') startMatchRound();
 }
 
 // ── Section switching ─────────────────────────────────────────────────────
-let currentSection = 'cards';
+let currentSection = localStorage.getItem('dutch-section') === 'match' ? 'match' : 'cards';
 function switchSection(name) {
   currentSection = name;
+  localStorage.setItem('dutch-section', name);
   document.getElementById('section-cards').classList.toggle('active', name === 'cards');
   document.getElementById('section-match').classList.toggle('active', name === 'match');
   document.getElementById('tab-cards').classList.toggle('active', name === 'cards');
@@ -831,8 +885,8 @@ let matchPool = [];          // queue of cards not currently on the board
 let matchActive = new Map(); // file -> { card, nlEl, enEl }
 let matchSelected = null;    // { side, file, el }
 let matchLocked = false;
-let correctCount = 0;
-let wrongCount = 0;
+let correctCount = parseInt(localStorage.getItem('dutch-correct') || '0', 10) || 0;
+let wrongCount   = parseInt(localStorage.getItem('dutch-wrong')   || '0', 10) || 0;
 
 function uniqueCardsForCategory() {
   const source = activeCat === 'Alle' ? allCards : allCards.filter(c => c.cat === activeCat);
@@ -894,6 +948,12 @@ function renderMatch(cards) {
   }
   const nlCol = document.createElement('div'); nlCol.className = 'match-col';
   const enCol = document.createElement('div'); enCol.className = 'match-col';
+  const nlHdr = document.createElement('div'); nlHdr.className = 'match-col-header';
+  nlHdr.innerHTML = '<span class="flag">🇳🇱</span><span>Nederlands</span>';
+  const enHdr = document.createElement('div'); enHdr.className = 'match-col-header';
+  enHdr.innerHTML = '<span class="flag">🇬🇧</span><span>English</span>';
+  nlCol.appendChild(nlHdr);
+  enCol.appendChild(enHdr);
   const nlOrder = shuffle(cards);
   const enOrder = shuffle(cards);
   nlOrder.forEach(c => {
@@ -921,19 +981,21 @@ function bumpStat(id) {
 function updateMatchStats() {
   document.getElementById('stat-correct').textContent = correctCount;
   document.getElementById('stat-wrong').textContent   = wrongCount;
+  localStorage.setItem('dutch-correct', String(correctCount));
+  localStorage.setItem('dutch-wrong',   String(wrongCount));
 }
 
 function relocateInColumn(el) {
-  // Move element to a random position in its column (may stay in place ~1/N chance).
+  // Move element to a random position among its sibling .match-item buttons
+  // (skipping the column header). May land back in its current position.
   const parent = el.parentNode;
   if (!parent) return;
-  const total = parent.children.length;
-  if (total <= 1) return;
-  const newIdx = Math.floor(Math.random() * total);
   parent.removeChild(el);
-  const ref = parent.children[newIdx];
-  if (ref) parent.insertBefore(el, ref);
-  else parent.appendChild(el);
+  const items = [...parent.children].filter(c => c.classList.contains('match-item'));
+  if (items.length === 0) { parent.appendChild(el); return; }
+  const newIdx = Math.floor(Math.random() * (items.length + 1));
+  if (newIdx === items.length) parent.appendChild(el);
+  else parent.insertBefore(el, items[newIdx]);
 }
 
 function replaceMatched(oldFile) {
@@ -1035,6 +1097,7 @@ function bumpStatStrong(id) {
 
 function showCard() {
   const c = deck[idx];
+  localStorage.setItem('dutch-idx', String(idx));
   document.getElementById('card-img').src = `card_images_updated/${encodeURIComponent(c.file)}.png`;
   document.getElementById('card-img').alt = c.word;
   document.getElementById('word').textContent = c.article ? `${c.article} ${c.word}` : c.word;
@@ -1079,7 +1142,8 @@ document.addEventListener('keydown', e => {
   else if (e.key === 's' || e.key === 'S') shuffleCards();
 });
 
-selectCategory('Alle');
+selectCategory(activeCat, { initial: true });
+switchSection(currentSection);
 </script>
 </body>
 </html>
