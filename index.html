@@ -91,6 +91,116 @@
   body.dark .kb-row { color: #555; }
   body.dark kbd { background: #2C2C30; border-color: #444; color: #666; box-shadow: 0 1px 0 #444; }
 
+  .section-tabs {
+    display: flex; gap: 4px;
+    background: #EAE4D7;
+    border: 1.5px solid #D8D3C8;
+    border-radius: 100px;
+    padding: 3px;
+    margin-bottom: 18px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .section-tab {
+    flex: 1; padding: 8px 26px;
+    border: none; background: transparent;
+    border-radius: 100px;
+    font-size: 0.85rem; font-weight: 600;
+    color: #6B6B6B;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    letter-spacing: -0.1px;
+    white-space: nowrap;
+  }
+  .section-tab.active {
+    background: #1C1C1E; color: white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  }
+  body.dark .section-tabs { background: #2C2C30; border-color: #444; }
+  body.dark .section-tab { color: #A0A0A8; }
+  body.dark .section-tab.active { background: #E5E5E8; color: #1C1C1E; }
+
+  .section { display: none; flex-direction: column; align-items: center; width: 100%; }
+  .section.active { display: flex; }
+
+  /* ── Match game ─────────────────────────────────────────────────────────── */
+  .match-progress {
+    display: flex; align-items: center; gap: 14px;
+    width: 100%; max-width: 520px; margin-bottom: 20px;
+  }
+  .match-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 14px;
+    width: 100%; max-width: 520px;
+    margin-bottom: 22px;
+  }
+  .match-col {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .match-item {
+    padding: 16px 14px;
+    border-radius: 14px;
+    background: white;
+    border: 1.5px solid #D8D3C8;
+    font-size: 0.95rem; font-weight: 600;
+    color: #1C1C1E;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.18s, opacity 0.35s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    user-select: none;
+    line-height: 1.25;
+    min-height: 56px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .match-item:hover:not(.matched):not(.correct):not(.wrong) {
+    border-color: #1C1C1E;
+    transform: translateY(-1px);
+  }
+  .match-item.selected {
+    background: #1C1C1E; color: white; border-color: #1C1C1E;
+  }
+  .match-item.correct {
+    background: #22C55E; color: white; border-color: #22C55E;
+    animation: pulse-correct 0.45s ease;
+  }
+  .match-item.wrong {
+    background: #EF4444; color: white; border-color: #EF4444;
+    animation: shake 0.4s ease;
+  }
+  .match-item.matched {
+    opacity: 0; pointer-events: none; transform: scale(0.92);
+  }
+  @keyframes pulse-correct {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-5px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-3px); }
+    80%      { transform: translateX(3px); }
+  }
+  .match-done {
+    text-align: center;
+    padding: 40px 20px 16px;
+    width: 100%; max-width: 520px;
+  }
+  .match-done-title {
+    font-size: 1.6rem; font-weight: 800;
+    letter-spacing: -0.5px; margin-bottom: 6px;
+  }
+  .match-done-sub {
+    font-size: 0.9rem; color: #9E9E9E;
+    margin-bottom: 22px;
+  }
+  body.dark .match-item { background: #2C2C30; border-color: #444; color: #E5E5E8; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
+  body.dark .match-item:hover:not(.matched):not(.correct):not(.wrong) { border-color: #E5E5E8; }
+  body.dark .match-item.selected { background: #E5E5E8; color: #1C1C1E; border-color: #E5E5E8; }
+  body.dark .match-done-sub { color: #666; }
+
   .cat-scroll {
     width: 100%; max-width: 620px;
     overflow-x: auto; margin-bottom: 20px;
@@ -302,47 +412,73 @@
   </button>
 </div>
 
+<div class="section-tabs" role="tablist">
+  <button class="section-tab active" id="tab-cards" onclick="switchSection('cards')">Flashcards</button>
+  <button class="section-tab" id="tab-match" onclick="switchSection('match')">Match</button>
+</div>
+
 <div class="cat-scroll">
   <div class="categories" id="categories"></div>
 </div>
 
-<div class="progress-row">
-  <span class="prog-num" id="prog-text">1 / 0</span>
-  <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
-</div>
+<div class="section active" id="section-cards">
+  <div class="progress-row">
+    <span class="prog-num" id="prog-text">1 / 0</span>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
 
-<div class="card-row">
-  <button class="arrow-btn" onclick="prevCard()">&#8592;</button>
-  <div class="scene" onclick="flipCard()">
-    <div class="card" id="card">
-      <div class="card-face card-front">
-        <div class="img-area"><img id="card-img" src="" alt=""></div>
-        <div class="flip-hint">tik om te draaien</div>
-      </div>
-      <div class="card-face card-back">
-        <div class="back-word" id="word"></div>
-        <div class="back-divider"></div>
-        <div class="back-en" id="en"></div>
-        <div class="back-ex-label">Voorbeeld</div>
-        <div class="back-example" id="example"></div>
+  <div class="card-row">
+    <button class="arrow-btn" onclick="prevCard()">&#8592;</button>
+    <div class="scene" onclick="flipCard()">
+      <div class="card" id="card">
+        <div class="card-face card-front">
+          <div class="img-area"><img id="card-img" src="" alt=""></div>
+          <div class="flip-hint">tik om te draaien</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="back-word" id="word"></div>
+          <div class="back-divider"></div>
+          <div class="back-en" id="en"></div>
+          <div class="back-ex-label">Voorbeeld</div>
+          <div class="back-example" id="example"></div>
+        </div>
       </div>
     </div>
+    <button class="arrow-btn" onclick="nextCard()">&#8594;</button>
   </div>
-  <button class="arrow-btn" onclick="nextCard()">&#8594;</button>
+
+  <button class="shuffle-btn" onclick="shuffleCards()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+      <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+    </svg>
+    Shuffle
+  </button>
+
+  <div class="kb-row">
+    <span><kbd>←</kbd><kbd>→</kbd> navigeren</span>
+    <span><kbd>spatie</kbd> draaien</span>
+    <span><kbd>S</kbd> shuffle</span>
+  </div>
 </div>
 
-<button class="shuffle-btn" onclick="shuffleCards()">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
-    <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
-  </svg>
-  Shuffle
-</button>
-
-<div class="kb-row">
-  <span><kbd>←</kbd><kbd>→</kbd> navigeren</span>
-  <span><kbd>spatie</kbd> draaien</span>
-  <span><kbd>S</kbd> shuffle</span>
+<div class="section" id="section-match">
+  <div class="match-progress">
+    <span class="prog-num" id="match-prog-text">0 / 0</span>
+    <div class="prog-bar"><div class="prog-fill" id="match-prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="match-grid" id="match-grid"></div>
+  <div class="match-done" id="match-done" style="display:none">
+    <div class="match-done-title">Klaar! 🎉</div>
+    <div class="match-done-sub" id="match-done-sub">Alle paren gevonden</div>
+    <button class="shuffle-btn" onclick="startMatchRound()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      Nieuwe ronde
+    </button>
+  </div>
 </div>
 
 <script>
@@ -645,6 +781,152 @@ function selectCategory(cat) {
   idx = 0;
   renderCategories();
   showCard();
+  if (currentSection === 'match') startMatchRound();
+}
+
+// ── Section switching ─────────────────────────────────────────────────────
+let currentSection = 'cards';
+function switchSection(name) {
+  currentSection = name;
+  document.getElementById('section-cards').classList.toggle('active', name === 'cards');
+  document.getElementById('section-match').classList.toggle('active', name === 'match');
+  document.getElementById('tab-cards').classList.toggle('active', name === 'cards');
+  document.getElementById('tab-match').classList.toggle('active', name === 'match');
+  if (name === 'match') startMatchRound();
+}
+
+// ── Match game ─────────────────────────────────────────────────────────────
+const MATCH_PAIRS = 5;
+let matchPairs = [];
+let matchSelected = null; // { side: 'nl'|'en', file: string, el: Element }
+let matchLocked = false;
+let matchedCount = 0;
+
+function startMatchRound() {
+  const source = activeCat === 'Alle' ? allCards : allCards.filter(c => c.cat === activeCat);
+  // Deduplicate by file so audio/keys stay unique within a round
+  const uniq = [];
+  const seen = new Set();
+  for (const c of source) {
+    if (!seen.has(c.file)) { seen.add(c.file); uniq.push(c); }
+  }
+  const n = Math.min(MATCH_PAIRS, uniq.length);
+  matchPairs = shuffle(uniq).slice(0, n);
+  matchSelected = null;
+  matchLocked = false;
+  matchedCount = 0;
+  document.getElementById('match-done').style.display = 'none';
+  renderMatch();
+  updateMatchProgress();
+}
+
+function renderMatch() {
+  const grid = document.getElementById('match-grid');
+  grid.innerHTML = '';
+  if (matchPairs.length === 0) {
+    grid.innerHTML = '<div class="match-done-sub" style="grid-column:1/-1;text-align:center;padding:30px">Geen kaarten in deze categorie</div>';
+    return;
+  }
+  const nlCol = document.createElement('div');
+  nlCol.className = 'match-col';
+  const enCol = document.createElement('div');
+  enCol.className = 'match-col';
+
+  const nlOrder = shuffle(matchPairs);
+  const enOrder = shuffle(matchPairs);
+
+  nlOrder.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'match-item';
+    b.dataset.side = 'nl';
+    b.dataset.file = c.file;
+    b.textContent = c.article ? `${c.article} ${c.word}` : c.word;
+    b.onclick = () => onMatchTap(b, c, 'nl');
+    nlCol.appendChild(b);
+  });
+  enOrder.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'match-item';
+    b.dataset.side = 'en';
+    b.dataset.file = c.file;
+    b.textContent = c.en;
+    b.onclick = () => onMatchTap(b, c, 'en');
+    enCol.appendChild(b);
+  });
+  grid.appendChild(nlCol);
+  grid.appendChild(enCol);
+}
+
+function onMatchTap(el, card, side) {
+  if (matchLocked) return;
+  if (el.classList.contains('matched') || el.classList.contains('correct')) return;
+
+  // Speak Dutch word on tap
+  if (side === 'nl') speak(card);
+
+  // Toggle off if tapping same item again
+  if (matchSelected && matchSelected.el === el) {
+    el.classList.remove('selected');
+    matchSelected = null;
+    return;
+  }
+  // If tapping another item on the same side, switch selection
+  if (matchSelected && matchSelected.side === side) {
+    matchSelected.el.classList.remove('selected');
+    el.classList.add('selected');
+    matchSelected = { side, file: card.file, el };
+    return;
+  }
+  // No selection yet → select
+  if (!matchSelected) {
+    el.classList.add('selected');
+    matchSelected = { side, file: card.file, el };
+    return;
+  }
+  // Opposite side selected → check match
+  const a = matchSelected;
+  const b = { side, file: card.file, el };
+  if (a.file === b.file) {
+    matchLocked = true;
+    a.el.classList.remove('selected');
+    a.el.classList.add('correct');
+    b.el.classList.add('correct');
+    setTimeout(() => {
+      a.el.classList.remove('correct');
+      b.el.classList.remove('correct');
+      a.el.classList.add('matched');
+      b.el.classList.add('matched');
+      matchedCount++;
+      updateMatchProgress();
+      matchSelected = null;
+      matchLocked = false;
+      if (matchedCount === matchPairs.length) onMatchComplete();
+    }, 480);
+  } else {
+    matchLocked = true;
+    a.el.classList.remove('selected');
+    a.el.classList.add('wrong');
+    b.el.classList.add('wrong');
+    setTimeout(() => {
+      a.el.classList.remove('wrong');
+      b.el.classList.remove('wrong');
+      matchSelected = null;
+      matchLocked = false;
+    }, 480);
+  }
+}
+
+function updateMatchProgress() {
+  const total = matchPairs.length;
+  document.getElementById('match-prog-text').textContent = `${matchedCount} / ${total}`;
+  const pct = total ? Math.round((matchedCount / total) * 100) : 0;
+  document.getElementById('match-prog-fill').style.width = pct + '%';
+}
+
+function onMatchComplete() {
+  document.getElementById('match-done').style.display = '';
+  document.getElementById('match-done-sub').textContent =
+    `Alle ${matchPairs.length} paren gevonden in "${activeCat}"`;
 }
 
 function showCard() {
@@ -686,6 +968,7 @@ function prevCard() { navigate((idx - 1 + deck.length) % deck.length); }
 function shuffleCards() { deck = shuffle(deck); navigate(0); }
 
 document.addEventListener('keydown', e => {
+  if (currentSection !== 'cards') return;
   if (['ArrowRight', 'ArrowDown'].includes(e.key)) { e.preventDefault(); nextCard(); }
   else if (['ArrowLeft', 'ArrowUp'].includes(e.key)) { e.preventDefault(); prevCard(); }
   else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
