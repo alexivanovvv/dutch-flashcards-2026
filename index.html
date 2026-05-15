@@ -6,7 +6,7 @@
 <title>Nederlandse Woordkaarten</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet">
 <style>
   :root {
     --accent: #22C55E;
@@ -1180,6 +1180,7 @@ function startMatchRound() {
   matchSelected = null;
   matchLocked = false;
   matchActive = new Map();
+  pendingRefills = [];
   const uniq = uniqueCardsForCategory();
   if (uniq.length === 0) {
     document.getElementById('match-grid').innerHTML =
@@ -1338,38 +1339,53 @@ function updateMatchStats() {
   updateStreakBadge();
 }
 
-function replaceMatched(oldFile) {
+// Refresh content of one .match-item element without moving it.
+function placeContent(el, card, side) {
+  el.className = 'match-item';
+  el.dataset.side = side;
+  el.dataset.file = card.file;
+  el.innerHTML = '';
+  if (side === 'nl') {
+    el.textContent = card.article ? `${card.article} ${card.word}` : card.word;
+  } else if (matchStyle() === 'image') {
+    el.classList.add('has-image');
+    el.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${card.en}">`;
+  } else {
+    el.textContent = card[lang] || card.en;
+  }
+  el.onclick = () => onMatchTap(el, card, side);
+}
+function revealClean(el, delay = 0) {
+  setTimeout(() => {
+    el.className = el.classList.contains('has-image') ? 'match-item has-image fade-in' : 'match-item fade-in';
+    void el.offsetWidth;
+  }, delay);
+}
+
+// ── Batched refill: hold matched slots empty until N pairs accumulate ─────
+const REFILL_BATCH = 2;
+let pendingRefills = [];
+
+function queueRefill(file) {
+  pendingRefills.push(file);
+  if (pendingRefills.length >= REFILL_BATCH) {
+    const batch = pendingRefills.splice(0, pendingRefills.length);
+    batch.forEach((f, i) => setTimeout(() => simpleRefill(f), i * 120));
+  }
+}
+
+function simpleRefill(oldFile) {
   const entry = matchActive.get(oldFile);
   if (!entry) return;
-  const oldNlEl = entry.nlEl, oldEnEl = entry.enEl;
+  const nlEl = entry.nlEl, enEl = entry.enEl;
   matchActive.delete(oldFile);
-
   const next = nextFromPool();
-  if (!next) {
-    // Pool exhausted — leave slots faded out.
-    return;
-  }
-
-  // Duolingo-style: new pair takes the SAME slot the matched pair occupied,
-  // so other items don't shift. The fade-out → fade-in handles continuity.
-  matchActive.set(next.file, { card: next, nlEl: oldNlEl, enEl: oldEnEl });
-  [['nl', oldNlEl], ['en', oldEnEl]].forEach(([side, el]) => {
-    el.className = 'match-item fade-in';
-    el.dataset.side = side;
-    el.dataset.file = next.file;
-    el.innerHTML = '';
-    el.classList.remove('has-image');
-    if (side === 'nl') {
-      el.textContent = next.article ? `${next.article} ${next.word}` : next.word;
-    } else if (matchStyle() === 'image') {
-      el.classList.add('has-image');
-      el.innerHTML = `<img src="card_images_updated/${encodeURIComponent(next.file)}.png" alt="${next.en}">`;
-    } else {
-      el.textContent = next[lang] || next.en;
-    }
-    el.onclick = () => onMatchTap(el, next, side);
-    void el.offsetWidth; // restart fade-in animation
-  });
+  if (!next) return; // pool exhausted — leave slot empty
+  matchActive.set(next.file, { card: next, nlEl, enEl });
+  placeContent(nlEl, next, 'nl');
+  placeContent(enEl, next, 'en');
+  revealClean(nlEl);
+  revealClean(enEl, 60);
 }
 
 function onMatchTap(el, card, side) {
@@ -1411,14 +1427,12 @@ function onMatchTap(el, card, side) {
     setTimeout(() => {
       a.el.classList.add('matched');
       b.el.classList.add('matched');
-      // Wait for fade-out to complete, then a brief pause before the new pair appears
-      const delay = 450;
       setTimeout(() => {
-        replaceMatched(a.file);
+        queueRefill(a.file);
         matchSelected = null;
         matchLocked = false;
-      }, delay);
-    }, 480);
+      }, 420);
+    }, 460);
   } else {
     matchLocked = true;
     a.el.classList.remove('selected');
