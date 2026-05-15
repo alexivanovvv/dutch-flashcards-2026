@@ -939,6 +939,8 @@ function startMatchRound() {
 }
 
 function resetMatchStats() {
+  if (correctCount === 0 && wrongCount === 0) { startMatchRound(); return; }
+  if (!confirm(`Сбросить счёт? (✓ ${correctCount}  ✗ ${wrongCount})`)) return;
   correctCount = 0;
   wrongCount = 0;
   startMatchRound();
