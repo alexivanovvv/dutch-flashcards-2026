@@ -133,11 +133,27 @@
   .match-item.has-image {
     padding: 8px;
     min-height: 96px;
+    background: white;
+    border-color: #E5E0D5;
+  }
+  .match-item.has-image:hover:not(.matched):not(.correct):not(.wrong) {
+    border-color: #1C1C1E;
+  }
+  body.dark .match-item.has-image {
+    background: white;
+    border-color: #D8D3C8;
+  }
+  body.dark .match-item.has-image:hover:not(.matched):not(.correct):not(.wrong) {
+    border-color: #1C1C1E;
   }
   .match-item.has-image img {
     max-width: 100%;
     max-height: 80px;
     object-fit: contain;
+  }
+  /* In picture mode, text buttons (NL side) match the height of image buttons */
+  .match-grid.image-mode .match-item:not(.has-image) {
+    min-height: 96px;
   }
 
   .match-stats {
@@ -949,6 +965,7 @@ function makeMatchButton(card, side) {
 function renderMatch(cards) {
   const grid = document.getElementById('match-grid');
   grid.innerHTML = '';
+  grid.classList.toggle('image-mode', matchStyle() === 'image');
   if (cards.length === 0) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#9E9E9E">Geen kaarten in deze categorie</div>';
     return;
