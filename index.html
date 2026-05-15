@@ -518,7 +518,7 @@ function toggleTheme() {
 }
 applyTheme();
 
-// ── Audio (Web Speech API, nl-NL) ─────────────────────────────────────────
+// ── Audio: pre-generated MP3s (neural Dutch voice) with Web Speech fallback ─
 let audioOn = localStorage.getItem('dutch-audio') !== '0'; // on by default
 function applyAudioBtn() {
   document.getElementById('btn-audio').classList.toggle('off', !audioOn);
@@ -530,46 +530,50 @@ function toggleAudio() {
   audioOn = !audioOn;
   localStorage.setItem('dutch-audio', audioOn ? '1' : '0');
   applyAudioBtn();
+  if (!audioOn) {
+    audioEl.pause();
+    window.speechSynthesis.cancel();
+  }
 }
 applyAudioBtn();
 
-// Dutch voice selection — prefers Ellen (nl-BE, female), falls back to Xander (nl-NL)
-let nlVoice = null;
+// Single shared <audio> element for MP3 playback
+const audioEl = new Audio();
+audioEl.preload = 'auto';
 
+// Web Speech fallback (used only if the MP3 fails to load)
+let nlVoice = null;
 function pickDutchVoice() {
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return null;
   return (
-    voices.find(v => v.name === 'Ellen')   ||   // macOS nl-BE female
-    voices.find(v => v.name === 'Xander')  ||   // macOS nl-NL male
-    voices.find(v => v.lang === 'nl-BE')   ||
-    voices.find(v => v.lang === 'nl-NL')   ||
-    voices.find(v => v.lang.startsWith('nl'))  ||
+    voices.find(v => v.lang === 'nl-NL') ||
+    voices.find(v => v.lang === 'nl-BE') ||
+    voices.find(v => v.lang.startsWith('nl')) ||
     null
   );
 }
+window.speechSynthesis.addEventListener('voiceschanged', () => { nlVoice = pickDutchVoice(); });
+nlVoice = pickDutchVoice();
 
-function initVoice() {
-  nlVoice = pickDutchVoice();
-  if (nlVoice) console.log('Voice:', nlVoice.name, nlVoice.lang);
-}
-
-// Voices may load asynchronously
-window.speechSynthesis.addEventListener('voiceschanged', initVoice);
-initVoice(); // try immediately too
-
-function speak(text) {
-  if (!audioOn) return;
+function speakFallback(text) {
   window.speechSynthesis.cancel();
-
-  // Re-attempt voice pick in case it wasn't ready earlier
   if (!nlVoice) nlVoice = pickDutchVoice();
-
   const utt = new SpeechSynthesisUtterance(text);
   utt.lang = nlVoice ? nlVoice.lang : 'nl-NL';
   utt.rate = 0.85;
   if (nlVoice) utt.voice = nlVoice;
   window.speechSynthesis.speak(utt);
+}
+
+function speak(card) {
+  if (!audioOn) return;
+  audioEl.pause();
+  window.speechSynthesis.cancel();
+  audioEl.src = `card_audio/${card.file}.mp3`;
+  const text = card.article ? `${card.article} ${card.word}` : card.word;
+  audioEl.onerror = () => speakFallback(text);
+  audioEl.play().catch(() => speakFallback(text));
 }
 
 function shuffle(arr) {
@@ -622,9 +626,7 @@ function flipCard() {
   document.getElementById('card').classList.toggle('flipped');
   if (flipped) {
     const c = deck[idx];
-    // Speak article + word in Dutch
-    const spoken = c.article ? `${c.article} ${c.word}` : c.word;
-    setTimeout(() => speak(spoken), 300); // slight delay so flip starts first
+    setTimeout(() => speak(c), 300); // slight delay so flip starts first
   }
 }
 
