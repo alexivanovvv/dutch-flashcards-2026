@@ -238,11 +238,8 @@
   }
   body.dark .match-item[data-side="en"] { color: #A0A0A8; }
   body.dark .match-item[data-side="en"]:hover:not(.matched):not(.correct):not(.wrong) { color: #E5E5E8; }
-  /* When selected / correct / wrong, override the side accent text color */
-  .match-item.selected,
-  .match-item.correct,
-  .match-item.wrong { color: white !important; }
-  body.dark .match-item.selected { color: #1C1C1E !important; }
+  /* Only the matched/correct state keeps a filled background and white text */
+  .match-item.correct { color: white !important; }
   .match-item {
     padding: 16px 14px;
     border-radius: 14px;
@@ -264,15 +261,16 @@
     transform: translateY(-1px);
   }
   .match-item.selected {
-    background: #1C1C1E; color: white; border-color: #1C1C1E;
+    border-color: #22C55E;
+    box-shadow: 0 0 0 2px rgba(34,197,94,0.35), 0 1px 3px rgba(0,0,0,0.05);
   }
   .match-item.correct {
     background: #22C55E; color: white; border-color: #22C55E;
     animation: pulse-correct 0.45s ease;
   }
   .match-item.wrong {
-    background: #EF4444; color: white; border-color: #EF4444;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25), 0 4px 14px rgba(239, 68, 68, 0.35);
+    border-color: #EF4444;
+    box-shadow: 0 0 0 2px rgba(239,68,68,0.35), 0 4px 14px rgba(239,68,68,0.25);
     animation: shake 0.55s ease;
   }
   .match-item.matched {
