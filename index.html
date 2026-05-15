@@ -78,8 +78,6 @@
   body.dark .toggle.active-right .toggle-icon-right {
     color: #1C1C1E;
   }
-  body.dark .cat-btn { background: #2C2C30; border-color: #444; color: #A0A0A8; }
-  body.dark .cat-btn.active { background: #E5E5E8; border-color: #E5E5E8; color: #1C1C1E; }
   body.dark .card-front { background: white; box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.5); }
   body.dark .prog-bar { background: #333; }
   body.dark .prog-fill { background: #E5E5E8; }
@@ -121,28 +119,6 @@
 
   .section { display: none; flex-direction: column; align-items: center; width: 100%; }
   .section.active { display: flex; }
-
-  /* Hide top section tabs while playing a match mode */
-  body.in-match .section-tabs { display: none; }
-
-  .match-back {
-    align-self: flex-start;
-    display: inline-flex; align-items: center; gap: 6px;
-    margin-bottom: 14px;
-    padding: 7px 14px 7px 10px;
-    border-radius: 100px;
-    border: 1.5px solid #D8D3C8;
-    background: white;
-    color: #6B6B6B;
-    font-size: 0.82rem; font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    letter-spacing: -0.1px;
-  }
-  .match-back:hover { border-color: #1C1C1E; color: #1C1C1E; transform: translateX(-2px); }
-  body.dark .match-back { background: #2C2C30; border-color: #444; color: #A0A0A8; }
-  body.dark .match-back:hover { border-color: #E5E5E8; color: #E5E5E8; }
 
   /* ── Match game ─────────────────────────────────────────────────────────── */
   .match-grid.flash-wrong {
@@ -307,29 +283,6 @@
   body.dark .match-item { background: #2C2C30; border-color: #444; color: #E5E5E8; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
   body.dark .match-item:hover:not(.matched):not(.correct):not(.wrong) { border-color: #E5E5E8; }
   body.dark .match-item.selected { background: #E5E5E8; color: #1C1C1E; border-color: #E5E5E8; }
-
-  .cat-scroll {
-    width: 100%; max-width: 620px;
-    overflow-x: auto; margin-bottom: 20px;
-    scrollbar-width: none; -ms-overflow-style: none;
-  }
-  .cat-scroll::-webkit-scrollbar { display: none; }
-  .categories {
-    display: flex; gap: 7px;
-    padding: 2px 1px 6px;
-    width: max-content;
-  }
-  .cat-btn {
-    padding: 7px 15px; border-radius: 100px;
-    border: 1.5px solid #D8D3C8; background: white;
-    color: #6B6B6B; font-size: 0.8rem; font-weight: 600;
-    cursor: pointer; white-space: nowrap;
-    transition: all 0.15s; letter-spacing: -0.1px;
-  }
-  .cat-btn:hover { border-color: #9E9E9E; color: #1C1C1E; }
-  .cat-btn.active {
-    background: #1C1C1E; border-color: #1C1C1E; color: white;
-  }
 
   .progress-row {
     display: flex; align-items: center; gap: 14px;
@@ -525,10 +478,6 @@
   <button class="section-tab"        id="tab-picture" onclick="switchSection('picture')">Picture Match</button>
 </div>
 
-<div class="cat-scroll">
-  <div class="categories" id="categories"></div>
-</div>
-
 <div class="section active" id="section-cards">
   <div class="progress-row">
     <span class="prog-num" id="prog-text">1 / 0</span>
@@ -571,14 +520,6 @@
 </div>
 
 <div class="section" id="section-match">
-  <button class="match-back" onclick="switchSection('cards')" title="К Flashcards">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="19" y1="12" x2="5" y2="12"/>
-      <polyline points="12 19 5 12 12 5"/>
-    </svg>
-    <span>Flashcards</span>
-  </button>
-
   <div class="match-stats">
     <div class="match-stat match-stat-correct" id="stat-correct-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -803,12 +744,10 @@ const allCards = [
   { file:'het oor',   article:'het', word:'oor',     en:'ear',    ex:'Doe je oren dicht, het is te luid.',      cat:'Lichaam' },
 ];
 
-const CATS = ['Alle', ...new Set(allCards.map(c => c.cat))];
-const savedCat = localStorage.getItem('dutch-cat');
 let deck = [];
 let idx = parseInt(localStorage.getItem('dutch-idx') || '0', 10) || 0;
 let flipped = false;
-let activeCat = (savedCat && CATS.includes(savedCat)) ? savedCat : 'Alle';
+const activeCat = 'Alle';
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 let darkMode = localStorage.getItem('dutch-dark') === '1';
@@ -888,34 +827,10 @@ function shuffle(arr) {
   return a;
 }
 
-function renderCategories() {
-  const el = document.getElementById('categories');
-  el.innerHTML = '';
-  CATS.forEach(cat => {
-    const count = cat === 'Alle' ? allCards.length : allCards.filter(c => c.cat === cat).length;
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (cat === activeCat ? ' active' : '');
-    btn.textContent = `${cat} (${count})`;
-    btn.onclick = () => selectCategory(cat);
-    el.appendChild(btn);
-  });
-}
-
-function selectCategory(cat, opts = {}) {
-  const isInitial = !!opts.initial;
-  const sameCat = activeCat === cat;
-  activeCat = cat;
-  localStorage.setItem('dutch-cat', cat);
-  const source = cat === 'Alle' ? allCards : allCards.filter(c => c.cat === cat);
-  deck = shuffle(source);
-  if (!isInitial && !sameCat) {
-    idx = 0;
-    localStorage.setItem('dutch-idx', '0');
-  }
+function loadDeck() {
+  deck = shuffle(allCards);
   if (idx >= deck.length) idx = 0;
-  renderCategories();
   showCard();
-  if (!isInitial && currentSection === 'match') startMatchRound();
 }
 
 // ── Section switching ─────────────────────────────────────────────────────
@@ -933,7 +848,6 @@ function switchSection(name) {
   document.getElementById('tab-cards').classList.toggle('active',   name === 'cards');
   document.getElementById('tab-word').classList.toggle('active',    name === 'word');
   document.getElementById('tab-picture').classList.toggle('active', name === 'picture');
-  document.body.classList.toggle('in-match', isMatch);
   if (isMatch) startMatchRound();
 }
 
@@ -1254,7 +1168,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 's' || e.key === 'S') shuffleCards();
 });
 
-selectCategory(activeCat, { initial: true });
+loadDeck();
 // Migrate older saved value 'match' → 'word'
 if (localStorage.getItem('dutch-section') === 'match') currentSection = 'word';
 switchSection(currentSection);
