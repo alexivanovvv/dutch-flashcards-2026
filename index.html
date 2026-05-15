@@ -457,8 +457,8 @@
   .match-item.matched {
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.55) rotate(-6deg) translateY(14px);
-    transition: opacity 0.42s ease, transform 0.48s cubic-bezier(0.55, 0, 0.85, 0.7);
+    transform: scale(0.88);
+    transition: opacity 0.32s ease, transform 0.32s ease;
   }
   @keyframes pulse-correct {
     0%   { transform: scale(1); }
@@ -475,12 +475,11 @@
     90%      { transform: translateX(3px); }
   }
   .match-item.fade-in {
-    animation: fadeInBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: fadeInClean 0.3s ease;
   }
-  @keyframes fadeInBounce {
-    from { opacity: 0; transform: scale(0.55) translateY(14px); }
-    60%  { opacity: 1; transform: scale(1.04) translateY(-1px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+  @keyframes fadeInClean {
+    from { opacity: 0; transform: scale(0.92); }
+    to   { opacity: 1; transform: scale(1); }
   }
   body.dark .match-item { background: #2C2C30; border-color: #444; color: #E5E5E8; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
   body.dark .match-item:hover:not(.matched):not(.correct):not(.wrong) { border-color: #E5E5E8; }
@@ -1339,19 +1338,6 @@ function updateMatchStats() {
   updateStreakBadge();
 }
 
-function relocateInColumn(el) {
-  // Move element to a random position among its sibling .match-item buttons
-  // (skipping the column header). May land back in its current position.
-  const parent = el.parentNode;
-  if (!parent) return;
-  parent.removeChild(el);
-  const items = [...parent.children].filter(c => c.classList.contains('match-item'));
-  if (items.length === 0) { parent.appendChild(el); return; }
-  const newIdx = Math.floor(Math.random() * (items.length + 1));
-  if (newIdx === items.length) parent.appendChild(el);
-  else parent.insertBefore(el, items[newIdx]);
-}
-
 function replaceMatched(oldFile) {
   const entry = matchActive.get(oldFile);
   if (!entry) return;
@@ -1364,11 +1350,8 @@ function replaceMatched(oldFile) {
     return;
   }
 
-  // Move the matched (faded) elements to random positions in their columns
-  // independently, so the new pair doesn't always land in the matched slot.
-  relocateInColumn(oldNlEl);
-  relocateInColumn(oldEnEl);
-
+  // Duolingo-style: new pair takes the SAME slot the matched pair occupied,
+  // so other items don't shift. The fade-out → fade-in handles continuity.
   matchActive.set(next.file, { card: next, nlEl: oldNlEl, enEl: oldEnEl });
   [['nl', oldNlEl], ['en', oldEnEl]].forEach(([side, el]) => {
     el.className = 'match-item fade-in';
@@ -1428,8 +1411,8 @@ function onMatchTap(el, card, side) {
     setTimeout(() => {
       a.el.classList.add('matched');
       b.el.classList.add('matched');
-      // Wait for the exit animation to play out fully, then a small pause for anticipation
-      const delay = 620 + Math.floor(Math.random() * 240);
+      // Wait for fade-out to complete, then a brief pause before the new pair appears
+      const delay = 450;
       setTimeout(() => {
         replaceMatched(a.file);
         matchSelected = null;
