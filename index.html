@@ -33,17 +33,51 @@
     font-size: 1.2rem; font-weight: 700;
     letter-spacing: -0.4px; flex: 1;
   }
-  .icon-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 1.5px solid #D8D3C8; background: white;
-    cursor: pointer; display: flex; align-items: center;
-    justify-content: center; font-size: 1rem;
-    transition: all 0.15s; flex-shrink: 0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  .toggle {
+    position: relative;
+    width: 64px; height: 32px;
+    border-radius: 999px;
+    border: 1.5px solid #D8D3C8;
+    background: #EAE4D7;
+    cursor: pointer;
+    display: flex; align-items: center;
+    padding: 0;
+    flex-shrink: 0;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+    transition: background 0.2s, border-color 0.2s;
   }
-  .icon-btn:hover { transform: scale(1.08); border-color: #9E9E9E; }
-  .icon-btn.off { opacity: 0.4; }
-  body.dark .icon-btn { background: #2C2C30; border-color: #444; }
+  .toggle:hover { border-color: #9E9E9E; }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 25px; height: 25px;
+    border-radius: 50%;
+    background: #1C1C1E;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease, background 0.2s;
+  }
+  .toggle.active-right .toggle-thumb {
+    transform: translateX(32px);
+  }
+  .toggle-icon {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    color: #9E9E9E;
+    transition: color 0.2s;
+    pointer-events: none;
+  }
+  .toggle:not(.active-right) .toggle-icon-left,
+  .toggle.active-right .toggle-icon-right {
+    color: white;
+  }
+  body.dark .toggle { background: #2C2C30; border-color: #444; }
+  body.dark .toggle-thumb { background: #E5E5E8; }
+  body.dark .toggle:not(.active-right) .toggle-icon-left,
+  body.dark .toggle.active-right .toggle-icon-right {
+    color: #1C1C1E;
+  }
   body.dark .cat-btn { background: #2C2C30; border-color: #444; color: #A0A0A8; }
   body.dark .cat-btn.active { background: #E5E5E8; border-color: #E5E5E8; color: #1C1C1E; }
   body.dark .card-front { background: white; box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.5); }
@@ -232,30 +266,39 @@
 <div class="header">
   <span class="header-flag">🇳🇱</span>
   <h1>Woordkaarten</h1>
-  <button class="icon-btn" id="btn-audio" title="Uitspraak aan/uit" onclick="toggleAudio()">
-    <!-- speaker icon, toggled via JS -->
-    <svg id="ico-audio-on" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-    </svg>
-    <svg id="ico-audio-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-      <line x1="23" y1="9" x2="17" y2="15"/>
-      <line x1="17" y1="9" x2="23" y2="15"/>
-    </svg>
+  <button class="toggle" id="btn-audio" title="Uitspraak aan/uit" onclick="toggleAudio()">
+    <span class="toggle-thumb"></span>
+    <span class="toggle-icon toggle-icon-left">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+    </span>
+    <span class="toggle-icon toggle-icon-right">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <line x1="23" y1="9" x2="17" y2="15"/>
+        <line x1="17" y1="9" x2="23" y2="15"/>
+      </svg>
+    </span>
   </button>
-  <button class="icon-btn" id="btn-theme" title="Dark/Light mode" onclick="toggleTheme()">
-    <svg id="ico-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-    </svg>
-    <svg id="ico-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
-      <circle cx="12" cy="12" r="5"/>
-      <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-      <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-    </svg>
+  <button class="toggle" id="btn-theme" title="Dark/Light mode" onclick="toggleTheme()">
+    <span class="toggle-thumb"></span>
+    <span class="toggle-icon toggle-icon-left">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/>
+        <line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </span>
+    <span class="toggle-icon toggle-icon-right">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </span>
   </button>
 </div>
 
@@ -508,8 +551,7 @@ let deck = [], idx = 0, flipped = false, activeCat = 'Alle';
 let darkMode = localStorage.getItem('dutch-dark') === '1';
 function applyTheme() {
   document.body.classList.toggle('dark', darkMode);
-  document.getElementById('ico-moon').style.display = darkMode ? 'none' : '';
-  document.getElementById('ico-sun').style.display  = darkMode ? '' : 'none';
+  document.getElementById('btn-theme').classList.toggle('active-right', darkMode);
 }
 function toggleTheme() {
   darkMode = !darkMode;
@@ -521,10 +563,8 @@ applyTheme();
 // ── Audio: pre-generated MP3s (neural Dutch voice) with Web Speech fallback ─
 let audioOn = localStorage.getItem('dutch-audio') !== '0'; // on by default
 function applyAudioBtn() {
-  document.getElementById('btn-audio').classList.toggle('off', !audioOn);
+  document.getElementById('btn-audio').classList.toggle('active-right', !audioOn);
   document.getElementById('btn-audio').title = audioOn ? 'Uitspraak uit' : 'Uitspraak aan';
-  document.getElementById('ico-audio-on').style.display  = audioOn ? '' : 'none';
-  document.getElementById('ico-audio-off').style.display = audioOn ? 'none' : '';
 }
 function toggleAudio() {
   audioOn = !audioOn;
