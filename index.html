@@ -42,24 +42,48 @@
   }
 
   .topbar {
-    position: sticky; top: 10px; z-index: 100;
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 18px; width: 100%; max-width: 720px;
-    padding: 6px 12px;
-    background: rgba(240, 236, 228, 0.92);
-    border: 1px solid rgba(216, 211, 200, 0.6);
+    position: sticky; top: 8px; z-index: 100;
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 16px; width: 100%; max-width: 720px;
+    padding: 5px 8px;
+    background: rgba(240, 236, 228, 0.85);
+    border: 1px solid rgba(216, 211, 200, 0.5);
     border-radius: 999px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
   }
   body.dark .topbar {
-    background: rgba(28, 28, 32, 0.92);
-    border-color: rgba(68, 68, 68, 0.6);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.32);
+    background: rgba(28, 28, 32, 0.85);
+    border-color: rgba(68, 68, 68, 0.5);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.3);
   }
-  .topbar-flag { font-size: 1.4rem; line-height: 1; flex-shrink: 0; padding-left: 4px; }
-  .topbar-toggles { display: flex; gap: 5px; flex-shrink: 0; }
+  .topbar-flag { font-size: 1.25rem; line-height: 1; flex-shrink: 0; padding-left: 4px; }
+  .topbar-tools { display: flex; gap: 4px; flex-shrink: 0; }
+  .icon-btn {
+    width: 32px; height: 32px;
+    border-radius: 999px;
+    border: 1.5px solid #D8D3C8;
+    background: rgba(255,255,255,0.6);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #1C1C1E;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0;
+  }
+  .icon-btn:hover { border-color: #1C1C1E; background: white; }
+  .icon-btn:active { transform: scale(0.94); }
+  .icon-btn svg { width: 15px; height: 15px; display: block; }
+  .icon-btn.muted { color: #C0BAB0; border-color: #E5E0D5; }
+  .icon-btn.lang {
+    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.5px;
+    width: auto; min-width: 38px; padding: 0 10px;
+  }
+  body.dark .icon-btn { background: rgba(44,44,48,0.6); border-color: #444; color: #E5E5E8; }
+  body.dark .icon-btn:hover { border-color: #E5E5E8; background: #2C2C30; }
+  body.dark .icon-btn.muted { color: #555; border-color: #333; }
   .toggle {
     position: relative;
     width: 64px; height: 32px;
@@ -349,36 +373,13 @@
   .match-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px 18px;
-    width: 100%; max-width: 540px;
+    gap: 10px 28px;
+    width: 100%; max-width: 560px;
     margin-bottom: 22px;
-    position: relative;
-  }
-  .match-grid::before {
-    content: '';
-    position: absolute;
-    top: 32px; bottom: 0;
-    left: 50%;
-    width: 1px;
-    background: linear-gradient(to bottom, transparent, #D8D3C8 18%, #D8D3C8 82%, transparent);
-    pointer-events: none;
-  }
-  body.dark .match-grid::before {
-    background: linear-gradient(to bottom, transparent, #444 18%, #444 82%, transparent);
   }
   .match-col {
     display: flex; flex-direction: column; gap: 10px;
   }
-  .match-col-header {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    font-size: 0.7rem; font-weight: 700;
-    letter-spacing: 1.2px; text-transform: uppercase;
-    color: #9E9E9E;
-    padding-bottom: 8px;
-    margin-bottom: 2px;
-  }
-  .match-col-header .flag { font-size: 0.95rem; line-height: 1; }
-  body.dark .match-col-header { color: #777; }
   .match-item[data-side="nl"] {
     font-weight: 700;
     border-left: 3px solid #FF6B35; /* NL accent */
@@ -442,7 +443,10 @@
     92%      { transform: translateX(1px)   rotate(0.5deg); }
   }
   .match-item.matched {
-    opacity: 0; pointer-events: none; transform: scale(0.92);
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.55) rotate(-6deg) translateY(14px);
+    transition: opacity 0.42s ease, transform 0.48s cubic-bezier(0.55, 0, 0.85, 0.7);
   }
   @keyframes pulse-correct {
     0%   { transform: scale(1); }
@@ -458,10 +462,13 @@
     75%      { transform: translateX(-3px); }
     90%      { transform: translateX(3px); }
   }
-  .match-item.fade-in { animation: fadeIn 0.35s ease; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.92); }
-    to   { opacity: 1; transform: scale(1); }
+  .match-item.fade-in {
+    animation: fadeInBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes fadeInBounce {
+    from { opacity: 0; transform: scale(0.55) translateY(14px); }
+    60%  { opacity: 1; transform: scale(1.04) translateY(-1px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
   }
   body.dark .match-item { background: #2C2C30; border-color: #444; color: #E5E5E8; box-shadow: 0 1px 3px rgba(0,0,0,0.25); }
   body.dark .match-item:hover:not(.matched):not(.correct):not(.wrong) { border-color: #E5E5E8; }
@@ -482,19 +489,6 @@
     border-radius: 999px; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 0 8px rgba(34,197,94,0.35);
   }
-  .prog-dots {
-    display: flex; gap: 3px; flex-wrap: wrap;
-    margin-top: 4px; max-width: 560px; width: 100%;
-    justify-content: flex-start;
-    opacity: 0.55;
-  }
-  .prog-dot {
-    width: 4px; height: 4px; border-radius: 50%;
-    background: #C0BAB0;
-    transition: background 0.2s, transform 0.2s;
-  }
-  .prog-dot.seen { background: var(--accent); transform: scale(1.15); }
-  body.dark .prog-dot { background: #444; }
 
   .card-row {
     display: flex; align-items: center; gap: 18px;
@@ -630,7 +624,6 @@
     .match-item.has-image { min-height: 84px; }
     .match-grid.image-mode .match-item { height: 84px; min-height: 84px; }
     .match-item.has-image img { max-height: 68px; }
-    .match-col-header { font-size: 0.62rem; letter-spacing: 1px; }
   }
 
   /* ── Phone portrait ────────────────────────────────────────────────────── */
@@ -663,7 +656,6 @@
     .match-grid.image-mode .match-item { height: 76px; min-height: 76px; }
     .match-item.has-image img { max-height: 62px; }
     .match-col { gap: 8px; }
-    .match-col-header { padding-bottom: 6px; font-size: 0.6rem; }
     .modal-card { padding: 22px 22px 18px; }
     .modal-title { font-size: 1.05rem; }
     .modal-sub { font-size: 0.82rem; margin-bottom: 18px; }
@@ -724,7 +716,6 @@
   <div class="progress-row">
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
-  <div class="prog-dots" id="prog-dots"></div>
 
   <div class="card-row">
     <button class="arrow-btn" onclick="prevCard()">&#8592;</button>
@@ -996,14 +987,6 @@ let idx = parseInt(localStorage.getItem('dutch-idx') || '0', 10) || 0;
 let flipped = false;
 const activeCat = 'Alle';
 
-// Cards the user has flipped at least once (tracked across sessions)
-const seenCards = (() => {
-  try { return new Set(JSON.parse(localStorage.getItem('dutch-seen') || '[]')); }
-  catch { return new Set(); }
-})();
-function saveSeen() {
-  localStorage.setItem('dutch-seen', JSON.stringify([...seenCards]));
-}
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 let darkMode = localStorage.getItem('dutch-dark') === '1';
@@ -1272,14 +1255,6 @@ function renderMatch(cards) {
   }
   const nlCol = document.createElement('div'); nlCol.className = 'match-col';
   const enCol = document.createElement('div'); enCol.className = 'match-col';
-  const nlHdr = document.createElement('div'); nlHdr.className = 'match-col-header';
-  nlHdr.innerHTML = '<span class="flag">🇳🇱</span><span>Nederlands</span>';
-  const enHdr = document.createElement('div'); enHdr.className = 'match-col-header';
-  enHdr.innerHTML = matchStyle() === 'image'
-    ? '<span class="flag">🖼</span><span>Beeld</span>'
-    : '<span class="flag">🇬🇧</span><span>English</span>';
-  nlCol.appendChild(nlHdr);
-  enCol.appendChild(enHdr);
   const nlOrder = shuffle(cards);
   const enOrder = shuffle(cards);
   nlOrder.forEach(c => {
@@ -1419,7 +1394,8 @@ function onMatchTap(el, card, side) {
     setTimeout(() => {
       a.el.classList.add('matched');
       b.el.classList.add('matched');
-      const delay = 380 + Math.floor(Math.random() * 220);
+      // Wait for the exit animation to play out fully, then a small pause for anticipation
+      const delay = 620 + Math.floor(Math.random() * 240);
       setTimeout(() => {
         replaceMatched(a.file);
         matchSelected = null;
@@ -1460,24 +1436,6 @@ function flashGridWrong() {
   setTimeout(() => grid.classList.remove('flash-wrong'), 520);
 }
 
-function renderProgressDots() {
-  const el = document.getElementById('prog-dots');
-  if (!el) return;
-  if (deck.length === 0) { el.innerHTML = ''; return; }
-  // Build only when count changes
-  if (el.children.length !== deck.length) {
-    el.innerHTML = '';
-    for (let i = 0; i < deck.length; i++) {
-      const d = document.createElement('div');
-      d.className = 'prog-dot';
-      el.appendChild(d);
-    }
-  }
-  for (let i = 0; i < deck.length; i++) {
-    el.children[i].classList.toggle('seen', seenCards.has(deck[i].file));
-  }
-}
-
 function showCard() {
   const c = deck[idx];
   localStorage.setItem('dutch-idx', String(idx));
@@ -1488,7 +1446,6 @@ function showCard() {
   document.getElementById('example').textContent = c.ex;
   const pct = Math.round(((idx + 1) / deck.length) * 100);
   document.getElementById('prog-fill').style.width = pct + '%';
-  renderProgressDots();
   flipped = false;
   document.getElementById('card').classList.remove('flipped');
 }
@@ -1498,11 +1455,6 @@ function flipCard() {
   document.getElementById('card').classList.toggle('flipped');
   if (flipped) {
     const c = deck[idx];
-    if (!seenCards.has(c.file)) {
-      seenCards.add(c.file);
-      saveSeen();
-      renderProgressDots();
-    }
     setTimeout(() => speak(c), 300);
   }
 }
