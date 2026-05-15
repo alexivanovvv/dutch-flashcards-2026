@@ -136,7 +136,11 @@
     line-height: 1;
     transition: transform 0.18s;
   }
-  .match-stat.bump { transform: scale(1.08); }
+  .match-stat.bump        { transform: scale(1.08); }
+  .match-stat.bump-strong {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25), 0 1px 3px rgba(0,0,0,0.05);
+  }
   .match-stat-correct { color: #22C55E; }
   .match-stat-wrong   { color: #EF4444; }
   .match-stat svg { width: 16px; height: 16px; }
@@ -192,7 +196,8 @@
   }
   .match-item.wrong {
     background: #EF4444; color: white; border-color: #EF4444;
-    animation: shake 0.4s ease;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25), 0 4px 14px rgba(239, 68, 68, 0.35);
+    animation: shake 0.55s ease;
   }
   .match-item.matched {
     opacity: 0; pointer-events: none; transform: scale(0.92);
@@ -204,10 +209,12 @@
   }
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    20%      { transform: translateX(-5px); }
-    40%      { transform: translateX(5px); }
-    60%      { transform: translateX(-3px); }
-    80%      { transform: translateX(3px); }
+    15%      { transform: translateX(-8px); }
+    30%      { transform: translateX(8px); }
+    45%      { transform: translateX(-6px); }
+    60%      { transform: translateX(6px); }
+    75%      { transform: translateX(-3px); }
+    90%      { transform: translateX(3px); }
   }
   .match-item.fade-in { animation: fadeIn 0.35s ease; }
   @keyframes fadeIn {
@@ -916,25 +923,13 @@ function updateMatchStats() {
   document.getElementById('stat-wrong').textContent   = wrongCount;
 }
 
-function replaceMatched(oldFile, oldNlEl, oldEnEl) {
+function replaceMatched(oldFile) {
   matchActive.delete(oldFile);
   const next = nextFromPool();
-  if (!next) {
-    // Nothing left — leave slots faded out
-    return;
-  }
-  // Reuse the existing DOM nodes in place so layout doesn't shift
-  matchActive.set(next.file, { card: next, nlEl: oldNlEl, enEl: oldEnEl });
-  [['nl', oldNlEl], ['en', oldEnEl]].forEach(([side, el]) => {
-    el.className = 'match-item fade-in';
-    el.dataset.file = next.file;
-    el.textContent = side === 'nl'
-      ? (next.article ? `${next.article} ${next.word}` : next.word)
-      : next.en;
-    el.onclick = () => onMatchTap(el, next, side);
-    // restart animation
-    void el.offsetWidth;
-  });
+  const remaining = [...matchActive.values()].map(e => e.card);
+  const cards = next ? [...remaining, next] : remaining;
+  matchActive = new Map();
+  renderMatch(cards);
 }
 
 function onMatchTap(el, card, side) {
@@ -971,18 +966,17 @@ function onMatchTap(el, card, side) {
     updateMatchStats();
     bumpStat('stat-correct-box');
     setTimeout(() => {
-      a.el.classList.remove('correct');
-      b.el.classList.remove('correct');
       a.el.classList.add('matched');
       b.el.classList.add('matched');
-      const entry = matchActive.get(a.file);
-      const nlEl = entry.nlEl, enEl = entry.enEl;
+      // Wait for the fade-out, then reshuffle the whole board so the new card
+      // doesn't telegraph its position by appearing in the matched slot.
+      const delay = 380 + Math.floor(Math.random() * 220); // 380–600ms jitter
       setTimeout(() => {
-        replaceMatched(a.file, nlEl, enEl);
+        replaceMatched(a.file);
         matchSelected = null;
         matchLocked = false;
-      }, 280);
-    }, 420);
+      }, delay);
+    }, 480);
   } else {
     matchLocked = true;
     a.el.classList.remove('selected');
@@ -990,14 +984,20 @@ function onMatchTap(el, card, side) {
     b.el.classList.add('wrong');
     wrongCount++;
     updateMatchStats();
-    bumpStat('stat-wrong-box');
+    bumpStatStrong('stat-wrong-box');
     setTimeout(() => {
       a.el.classList.remove('wrong');
       b.el.classList.remove('wrong');
       matchSelected = null;
       matchLocked = false;
-    }, 480);
+    }, 750);
   }
+}
+
+function bumpStatStrong(id) {
+  const el = document.getElementById(id);
+  el.classList.add('bump-strong');
+  setTimeout(() => el.classList.remove('bump-strong'), 350);
 }
 
 function showCard() {
