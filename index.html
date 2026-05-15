@@ -123,9 +123,117 @@
   .section.active { display: flex; }
 
   /* ── Match game ─────────────────────────────────────────────────────────── */
+  .match-settings {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; align-items: center;
+    margin-bottom: 14px;
+    width: 100%; max-width: 540px;
+  }
+  .match-seg {
+    display: inline-flex; gap: 2px;
+    background: #EAE4D7;
+    border: 1.5px solid #D8D3C8;
+    border-radius: 100px;
+    padding: 3px;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+  }
+  .match-seg button {
+    border: none; background: transparent;
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 0.78rem; font-weight: 600;
+    color: #6B6B6B;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: -0.1px;
+    min-width: 28px;
+    line-height: 1.2;
+  }
+  .match-seg button.active {
+    background: #1C1C1E; color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+  }
+  .match-seg button:hover:not(.active) { color: #1C1C1E; }
+  .match-mistakes-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 14px;
+    border-radius: 100px;
+    border: 1.5px solid #D8D3C8;
+    background: white;
+    font-size: 0.78rem; font-weight: 600;
+    color: #6B6B6B;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    letter-spacing: -0.1px;
+  }
+  .match-mistakes-btn:hover { border-color: #1C1C1E; color: #1C1C1E; }
+  .match-mistakes-btn.active {
+    background: #EF4444; color: white; border-color: #EF4444;
+    box-shadow: 0 1px 6px rgba(239,68,68,0.3);
+  }
+  body.dark .match-seg { background: #2C2C30; border-color: #444; }
+  body.dark .match-seg button { color: #A0A0A8; }
+  body.dark .match-seg button.active { background: #E5E5E8; color: #1C1C1E; }
+  body.dark .match-mistakes-btn { background: #2C2C30; border-color: #444; color: #A0A0A8; }
+
+  .match-stat-streak { color: #F97316; }
+  .match-stat-timer  { color: #6B6B6B; }
+  body.dark .match-stat-timer { color: #A0A0A8; }
+
+  .match-overlay {
+    position: fixed; inset: 0;
+    background: rgba(28,28,30,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.25s ease;
+  }
+  .match-overlay-card {
+    background: white;
+    border-radius: 22px;
+    padding: 32px 36px 28px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 90vw;
+  }
+  .match-overlay-title {
+    font-size: 1.5rem; font-weight: 800;
+    letter-spacing: -0.5px; margin-bottom: 14px;
+  }
+  .match-overlay-stats {
+    display: flex; gap: 22px; justify-content: center;
+    margin-bottom: 22px; font-size: 0.95rem; font-weight: 700;
+  }
+  .match-overlay-stats .ov-c { color: #22C55E; }
+  .match-overlay-stats .ov-w { color: #EF4444; }
+  .match-overlay-stats .ov-s { color: #F97316; }
+  .match-overlay-card .shuffle-btn { margin-bottom: 0; }
+  body.dark .match-overlay-card { background: #2C2C30; }
+
+  .match-grid.flash-wrong {
+    animation: flashWrong 0.5s ease;
+  }
+  @keyframes flashWrong {
+    0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    25%  { box-shadow: 0 0 0 14px rgba(239,68,68,0.22); }
+    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  }
+
+  .match-item.has-image {
+    padding: 8px;
+    min-height: 96px;
+  }
+  .match-item.has-image img {
+    max-width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+  }
+
   .match-stats {
     display: flex; align-items: center; gap: 10px;
-    margin-bottom: 22px;
+    margin-bottom: 22px; flex-wrap: wrap; justify-content: center;
   }
   .match-stat {
     display: inline-flex; align-items: center; gap: 8px;
@@ -529,12 +637,37 @@
 </div>
 
 <div class="section" id="section-match">
+  <div class="match-settings">
+    <div class="match-seg" id="seg-mode" title="Режим">
+      <button data-val="infinite">∞</button>
+      <button data-val="timed">60s</button>
+    </div>
+    <div class="match-seg" id="seg-pairs" title="Количество пар">
+      <button data-val="4">4</button>
+      <button data-val="5">5</button>
+      <button data-val="6">6</button>
+      <button data-val="7">7</button>
+      <button data-val="8">8</button>
+    </div>
+    <div class="match-seg" id="seg-style" title="Стиль">
+      <button data-val="text">Aa</button>
+      <button data-val="image">🖼</button>
+    </div>
+    <button class="match-mistakes-btn" id="btn-mistakes" onclick="toggleMistakesOnly()">
+      <span>Только ошибки</span>
+    </button>
+  </div>
+
   <div class="match-stats">
     <div class="match-stat match-stat-correct" id="stat-correct-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="20 6 9 17 4 12"/>
       </svg>
       <span id="stat-correct">0</span>
+    </div>
+    <div class="match-stat match-stat-streak" id="stat-streak-box" title="Серия">
+      <span style="font-size:1rem">🔥</span>
+      <span id="stat-streak">0</span>
     </div>
     <div class="match-stat match-stat-wrong" id="stat-wrong-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -543,14 +676,41 @@
       </svg>
       <span id="stat-wrong">0</span>
     </div>
-    <button class="match-reset" onclick="resetMatchStats()" title="Reset">
+    <div class="match-stat match-stat-timer" id="stat-timer-box" style="display:none" title="Время">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="13" r="8"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="9" y1="2" x2="15" y2="2"/>
+      </svg>
+      <span id="stat-timer">60</span>
+    </div>
+    <button class="match-reset" onclick="resetMatchStats()" title="Сбросить">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"/>
         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
       </svg>
     </button>
   </div>
+
   <div class="match-grid" id="match-grid"></div>
+
+  <div class="match-overlay" id="match-overlay" style="display:none">
+    <div class="match-overlay-card">
+      <div class="match-overlay-title" id="overlay-title">Tijd voorbij! ⏱</div>
+      <div class="match-overlay-stats">
+        <span class="ov-c">✓ <span id="ov-correct">0</span></span>
+        <span class="ov-s">🔥 <span id="ov-streak">0</span></span>
+        <span class="ov-w">✗ <span id="ov-wrong">0</span></span>
+      </div>
+      <button class="shuffle-btn" onclick="closeOverlayAndStart()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Опять
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -877,16 +1037,54 @@ function switchSection(name) {
   document.getElementById('tab-cards').classList.toggle('active', name === 'cards');
   document.getElementById('tab-match').classList.toggle('active', name === 'match');
   if (name === 'match') startMatchRound();
+  else stopTimer();
 }
 
-// ── Match game (infinite) ──────────────────────────────────────────────────
-const MATCH_PAIRS = 5;
+// ── Match game (infinite + settings) ───────────────────────────────────────
 let matchPool = [];          // queue of cards not currently on the board
 let matchActive = new Map(); // file -> { card, nlEl, enEl }
 let matchSelected = null;    // { side, file, el }
 let matchLocked = false;
 let correctCount = parseInt(localStorage.getItem('dutch-correct') || '0', 10) || 0;
 let wrongCount   = parseInt(localStorage.getItem('dutch-wrong')   || '0', 10) || 0;
+let streakCount  = 0; // session-only
+
+// Settings
+let matchMode       = localStorage.getItem('dutch-match-mode')   || 'infinite'; // 'infinite' | 'timed'
+let matchPairsCount = parseInt(localStorage.getItem('dutch-match-pairs') || '5', 10);
+if (matchPairsCount < 4 || matchPairsCount > 8) matchPairsCount = 5;
+let matchStyle      = localStorage.getItem('dutch-match-style')  || 'text';     // 'text' | 'image'
+let mistakesOnly    = localStorage.getItem('dutch-mistakes-only') === '1';
+let wrongHistory    = (() => {
+  try { return JSON.parse(localStorage.getItem('dutch-wrong-history') || '{}'); }
+  catch (e) { return {}; }
+})();
+
+// Timer state
+const TIMER_SECONDS = 60;
+let timerInterval = null;
+let timerRemaining = TIMER_SECONDS;
+let timerStarted = false;
+
+// Web Audio for feedback tones
+let audioCtx = null;
+function playTone(freq, duration, type = 'sine', vol = 0.06) {
+  if (!audioOn) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration + 0.02);
+  } catch (e) { /* ignore */ }
+}
+function playCorrect() { playTone(880, 0.12, 'sine', 0.07); setTimeout(() => playTone(1320, 0.10, 'sine', 0.05), 60); }
+function playWrong()   { playTone(196, 0.18, 'square', 0.04); }
 
 function uniqueCardsForCategory() {
   const source = activeCat === 'Alle' ? allCards : allCards.filter(c => c.cat === activeCat);
@@ -898,9 +1096,29 @@ function uniqueCardsForCategory() {
   return uniq;
 }
 
-function refillPool() {
+function availableCards() {
+  let uniq = uniqueCardsForCategory();
+  if (mistakesOnly) {
+    uniq = uniq.filter(c => (wrongHistory[c.file] || 0) > 0);
+  }
+  return uniq;
+}
+
+function buildPool() {
+  const all = availableCards();
   const activeFiles = new Set([...matchActive.keys()]);
-  matchPool = shuffle(uniqueCardsForCategory().filter(c => !activeFiles.has(c.file)));
+  const pool = all.filter(c => !activeFiles.has(c.file));
+  // Weight: cards with errors get sorted to the front of the pool when not in mistakes-only mode.
+  if (!mistakesOnly) {
+    const mistakes = shuffle(pool.filter(c => (wrongHistory[c.file] || 0) > 0));
+    const normal   = shuffle(pool.filter(c => !((wrongHistory[c.file] || 0) > 0)));
+    return [...mistakes, ...normal];
+  }
+  return shuffle(pool);
+}
+
+function refillPool() {
+  matchPool = buildPool();
 }
 
 function nextFromPool() {
@@ -912,11 +1130,25 @@ function startMatchRound() {
   matchSelected = null;
   matchLocked = false;
   matchActive = new Map();
-  const uniq = uniqueCardsForCategory();
-  matchPool = shuffle(uniq);
-  const n = Math.min(MATCH_PAIRS, uniq.length);
+  hideOverlay();
+  stopTimer();
+  timerStarted = false;
+  timerRemaining = TIMER_SECONDS;
+  updateTimerDisplay();
+  const all = availableCards();
+  if (all.length === 0) {
+    document.getElementById('match-grid').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#9E9E9E">' +
+      (mistakesOnly ? 'Пока нет ошибок в этой категории 🎯' : 'Нет карточек в этой категории') +
+      '</div>';
+    matchPool = [];
+    updateMatchStats();
+    return;
+  }
+  matchPool = buildPool();
+  const n = Math.min(matchPairsCount, all.length);
   const initial = [];
-  for (let i = 0; i < n; i++) initial.push(matchPool.shift());
+  for (let i = 0; i < n && matchPool.length > 0; i++) initial.push(matchPool.shift());
   renderMatch(initial);
   updateMatchStats();
 }
@@ -924,6 +1156,7 @@ function startMatchRound() {
 function resetMatchStats() {
   correctCount = 0;
   wrongCount = 0;
+  streakCount = 0;
   startMatchRound();
 }
 
@@ -932,9 +1165,14 @@ function makeMatchButton(card, side) {
   b.className = 'match-item fade-in';
   b.dataset.side = side;
   b.dataset.file = card.file;
-  b.textContent = side === 'nl'
-    ? (card.article ? `${card.article} ${card.word}` : card.word)
-    : card.en;
+  if (side === 'nl') {
+    b.textContent = card.article ? `${card.article} ${card.word}` : card.word;
+  } else if (matchStyle === 'image') {
+    b.classList.add('has-image');
+    b.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${card.en}">`;
+  } else {
+    b.textContent = card.en;
+  }
   b.onclick = () => onMatchTap(b, card, side);
   return b;
 }
@@ -951,7 +1189,9 @@ function renderMatch(cards) {
   const nlHdr = document.createElement('div'); nlHdr.className = 'match-col-header';
   nlHdr.innerHTML = '<span class="flag">🇳🇱</span><span>Nederlands</span>';
   const enHdr = document.createElement('div'); enHdr.className = 'match-col-header';
-  enHdr.innerHTML = '<span class="flag">🇬🇧</span><span>English</span>';
+  enHdr.innerHTML = matchStyle === 'image'
+    ? '<span class="flag">🖼</span><span>Beeld</span>'
+    : '<span class="flag">🇬🇧</span><span>English</span>';
   nlCol.appendChild(nlHdr);
   enCol.appendChild(enHdr);
   const nlOrder = shuffle(cards);
@@ -981,8 +1221,99 @@ function bumpStat(id) {
 function updateMatchStats() {
   document.getElementById('stat-correct').textContent = correctCount;
   document.getElementById('stat-wrong').textContent   = wrongCount;
+  document.getElementById('stat-streak').textContent  = streakCount;
   localStorage.setItem('dutch-correct', String(correctCount));
   localStorage.setItem('dutch-wrong',   String(wrongCount));
+}
+
+// ── Timer ───────────────────────────────────────────────────────────────────
+function updateTimerDisplay() {
+  document.getElementById('stat-timer').textContent = timerRemaining;
+  const box = document.getElementById('stat-timer-box');
+  box.style.display = matchMode === 'timed' ? '' : 'none';
+  if (matchMode === 'timed' && timerRemaining <= 10) {
+    box.style.color = '#EF4444';
+  } else {
+    box.style.color = '';
+  }
+}
+function startTimer() {
+  timerStarted = true;
+  stopTimer();
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    updateTimerDisplay();
+    if (timerRemaining <= 0) {
+      stopTimer();
+      onTimeUp();
+    }
+  }, 1000);
+}
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+function onTimeUp() {
+  matchLocked = true;
+  document.getElementById('overlay-title').textContent = 'Tijd voorbij! ⏱';
+  document.getElementById('ov-correct').textContent = correctCount;
+  document.getElementById('ov-wrong').textContent   = wrongCount;
+  document.getElementById('ov-streak').textContent  = streakCount;
+  document.getElementById('match-overlay').style.display = '';
+}
+function hideOverlay() {
+  document.getElementById('match-overlay').style.display = 'none';
+}
+function closeOverlayAndStart() {
+  correctCount = 0;
+  wrongCount = 0;
+  streakCount = 0;
+  startMatchRound();
+}
+
+// ── Settings handlers ───────────────────────────────────────────────────────
+function setSegActive(segId, val) {
+  const seg = document.getElementById(segId);
+  [...seg.children].forEach(b => b.classList.toggle('active', b.dataset.val === String(val)));
+}
+function bindSeg(segId, onPick) {
+  const seg = document.getElementById(segId);
+  [...seg.children].forEach(b => {
+    b.onclick = () => onPick(b.dataset.val);
+  });
+}
+function applySettingsUI() {
+  setSegActive('seg-mode',  matchMode);
+  setSegActive('seg-pairs', matchPairsCount);
+  setSegActive('seg-style', matchStyle);
+  document.getElementById('btn-mistakes').classList.toggle('active', mistakesOnly);
+  updateTimerDisplay();
+}
+function initMatchSettings() {
+  applySettingsUI();
+  bindSeg('seg-mode',  val => {
+    matchMode = val;
+    localStorage.setItem('dutch-match-mode', val);
+    applySettingsUI();
+    startMatchRound();
+  });
+  bindSeg('seg-pairs', val => {
+    matchPairsCount = parseInt(val, 10) || 5;
+    localStorage.setItem('dutch-match-pairs', String(matchPairsCount));
+    applySettingsUI();
+    startMatchRound();
+  });
+  bindSeg('seg-style', val => {
+    matchStyle = val;
+    localStorage.setItem('dutch-match-style', val);
+    applySettingsUI();
+    startMatchRound();
+  });
+}
+function toggleMistakesOnly() {
+  mistakesOnly = !mistakesOnly;
+  localStorage.setItem('dutch-mistakes-only', mistakesOnly ? '1' : '0');
+  applySettingsUI();
+  startMatchRound();
 }
 
 function relocateInColumn(el) {
@@ -1018,10 +1349,18 @@ function replaceMatched(oldFile) {
   matchActive.set(next.file, { card: next, nlEl: oldNlEl, enEl: oldEnEl });
   [['nl', oldNlEl], ['en', oldEnEl]].forEach(([side, el]) => {
     el.className = 'match-item fade-in';
+    el.dataset.side = side;
     el.dataset.file = next.file;
-    el.textContent = side === 'nl'
-      ? (next.article ? `${next.article} ${next.word}` : next.word)
-      : next.en;
+    el.innerHTML = '';
+    el.classList.remove('has-image');
+    if (side === 'nl') {
+      el.textContent = next.article ? `${next.article} ${next.word}` : next.word;
+    } else if (matchStyle === 'image') {
+      el.classList.add('has-image');
+      el.innerHTML = `<img src="card_images_updated/${encodeURIComponent(next.file)}.png" alt="${next.en}">`;
+    } else {
+      el.textContent = next.en;
+    }
     el.onclick = () => onMatchTap(el, next, side);
     void el.offsetWidth; // restart fade-in animation
   });
@@ -1030,6 +1369,9 @@ function replaceMatched(oldFile) {
 function onMatchTap(el, card, side) {
   if (matchLocked) return;
   if (el.classList.contains('matched') || el.classList.contains('correct')) return;
+
+  // Start timer on first interaction in timed mode
+  if (matchMode === 'timed' && !timerStarted) startTimer();
 
   if (side === 'nl') speak(card);
 
@@ -1058,14 +1400,21 @@ function onMatchTap(el, card, side) {
     a.el.classList.add('correct');
     b.el.classList.add('correct');
     correctCount++;
+    streakCount++;
+    // On correct, decrement wrongHistory for this file (down to 0)
+    if (wrongHistory[a.file] > 0) {
+      wrongHistory[a.file]--;
+      if (wrongHistory[a.file] <= 0) delete wrongHistory[a.file];
+      saveWrongHistory();
+    }
     updateMatchStats();
     bumpStat('stat-correct-box');
+    bumpStat('stat-streak-box');
+    playCorrect();
     setTimeout(() => {
       a.el.classList.add('matched');
       b.el.classList.add('matched');
-      // Wait for the fade-out, then reshuffle the whole board so the new card
-      // doesn't telegraph its position by appearing in the matched slot.
-      const delay = 380 + Math.floor(Math.random() * 220); // 380–600ms jitter
+      const delay = 380 + Math.floor(Math.random() * 220);
       setTimeout(() => {
         replaceMatched(a.file);
         matchSelected = null;
@@ -1078,8 +1427,15 @@ function onMatchTap(el, card, side) {
     a.el.classList.add('wrong');
     b.el.classList.add('wrong');
     wrongCount++;
+    streakCount = 0;
+    // Track wrong history for both items the user picked
+    wrongHistory[a.file] = (wrongHistory[a.file] || 0) + 1;
+    wrongHistory[b.file] = (wrongHistory[b.file] || 0) + 1;
+    saveWrongHistory();
     updateMatchStats();
     bumpStatStrong('stat-wrong-box');
+    playWrong();
+    flashGridWrong();
     setTimeout(() => {
       a.el.classList.remove('wrong');
       b.el.classList.remove('wrong');
@@ -1093,6 +1449,18 @@ function bumpStatStrong(id) {
   const el = document.getElementById(id);
   el.classList.add('bump-strong');
   setTimeout(() => el.classList.remove('bump-strong'), 350);
+}
+
+function flashGridWrong() {
+  const grid = document.getElementById('match-grid');
+  grid.classList.remove('flash-wrong');
+  void grid.offsetWidth;
+  grid.classList.add('flash-wrong');
+  setTimeout(() => grid.classList.remove('flash-wrong'), 520);
+}
+
+function saveWrongHistory() {
+  localStorage.setItem('dutch-wrong-history', JSON.stringify(wrongHistory));
 }
 
 function showCard() {
@@ -1142,6 +1510,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 's' || e.key === 'S') shuffleCards();
 });
 
+initMatchSettings();
 selectCategory(activeCat, { initial: true });
 switchSection(currentSection);
 </script>
