@@ -291,8 +291,6 @@
   }
   body.dark .match-item[data-side="en"] { color: #A0A0A8; }
   body.dark .match-item[data-side="en"]:hover:not(.matched):not(.correct):not(.wrong) { color: #E5E5E8; }
-  /* Only the matched/correct state keeps a filled background and white text */
-  .match-item.correct { color: white !important; }
   .match-item {
     padding: 16px 14px;
     border-radius: 14px;
@@ -318,12 +316,19 @@
     box-shadow: 0 0 0 2px rgba(34,197,94,0.35), 0 1px 3px rgba(0,0,0,0.05);
   }
   .match-item.correct {
-    background: #22C55E; color: white; border-color: #22C55E;
+    border-color: #22C55E;
+    box-shadow:
+      inset 0 0 0 5px #22C55E,
+      inset 0 0 0 8px rgba(34,197,94,0.25),
+      0 4px 14px rgba(34,197,94,0.20);
     animation: pulse-correct 0.45s ease;
   }
   .match-item.wrong {
     border-color: #EF4444;
-    box-shadow: inset 0 0 0 3px #EF4444, 0 4px 14px rgba(239,68,68,0.18);
+    box-shadow:
+      inset 0 0 0 5px #EF4444,
+      inset 0 0 0 8px rgba(239,68,68,0.25),
+      0 4px 14px rgba(239,68,68,0.20);
     animation: wrongWobble 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97);
     position: relative;
   }
