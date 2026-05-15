@@ -209,6 +209,13 @@
     height: 96px;
     min-height: 96px;
   }
+  /* In word mode, drop the white card fill so it doesn't clash with the page bg */
+  .match-grid:not(.image-mode) .match-item:not(.has-image) {
+    background: transparent;
+  }
+  body.dark .match-grid:not(.image-mode) .match-item:not(.has-image) {
+    background: transparent;
+  }
 
   .match-stats {
     display: flex; align-items: center; gap: 10px;
