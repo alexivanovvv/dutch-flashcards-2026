@@ -923,13 +923,46 @@ function updateMatchStats() {
   document.getElementById('stat-wrong').textContent   = wrongCount;
 }
 
+function relocateInColumn(el) {
+  // Move element to a random position in its column (may stay in place ~1/N chance).
+  const parent = el.parentNode;
+  if (!parent) return;
+  const total = parent.children.length;
+  if (total <= 1) return;
+  const newIdx = Math.floor(Math.random() * total);
+  parent.removeChild(el);
+  const ref = parent.children[newIdx];
+  if (ref) parent.insertBefore(el, ref);
+  else parent.appendChild(el);
+}
+
 function replaceMatched(oldFile) {
+  const entry = matchActive.get(oldFile);
+  if (!entry) return;
+  const oldNlEl = entry.nlEl, oldEnEl = entry.enEl;
   matchActive.delete(oldFile);
+
   const next = nextFromPool();
-  const remaining = [...matchActive.values()].map(e => e.card);
-  const cards = next ? [...remaining, next] : remaining;
-  matchActive = new Map();
-  renderMatch(cards);
+  if (!next) {
+    // Pool exhausted — leave slots faded out.
+    return;
+  }
+
+  // Move the matched (faded) elements to random positions in their columns
+  // independently, so the new pair doesn't always land in the matched slot.
+  relocateInColumn(oldNlEl);
+  relocateInColumn(oldEnEl);
+
+  matchActive.set(next.file, { card: next, nlEl: oldNlEl, enEl: oldEnEl });
+  [['nl', oldNlEl], ['en', oldEnEl]].forEach(([side, el]) => {
+    el.className = 'match-item fade-in';
+    el.dataset.file = next.file;
+    el.textContent = side === 'nl'
+      ? (next.article ? `${next.article} ${next.word}` : next.word)
+      : next.en;
+    el.onclick = () => onMatchTap(el, next, side);
+    void el.offsetWidth; // restart fade-in animation
+  });
 }
 
 function onMatchTap(el, card, side) {
