@@ -42,48 +42,50 @@
   }
 
   .topbar {
-    position: sticky; top: 8px; z-index: 100;
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 16px; width: 100%; max-width: 720px;
-    padding: 5px 8px;
-    background: rgba(240, 236, 228, 0.85);
-    border: 1px solid rgba(216, 211, 200, 0.5);
+    position: sticky; top: 10px; z-index: 100;
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 20px; width: 100%; max-width: 720px;
+    padding: 6px 8px 6px 14px;
+    background: rgba(240, 236, 228, 0.78);
+    border: 1px solid rgba(216, 211, 200, 0.45);
     border-radius: 999px;
-    box-shadow: 0 4px 18px rgba(0,0,0,0.05);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+    backdrop-filter: saturate(160%) blur(18px);
+    -webkit-backdrop-filter: saturate(160%) blur(18px);
   }
   body.dark .topbar {
-    background: rgba(28, 28, 32, 0.85);
-    border-color: rgba(68, 68, 68, 0.5);
-    box-shadow: 0 4px 18px rgba(0,0,0,0.3);
+    background: rgba(28, 28, 32, 0.78);
+    border-color: rgba(68, 68, 68, 0.45);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25);
   }
-  .topbar-flag { font-size: 1.25rem; line-height: 1; flex-shrink: 0; padding-left: 4px; }
-  .topbar-tools { display: flex; gap: 4px; flex-shrink: 0; }
+  .topbar-flag { font-size: 1.2rem; line-height: 1; flex-shrink: 0; }
+  .topbar-tools { display: flex; gap: 2px; flex-shrink: 0; padding-left: 2px; }
   .icon-btn {
     width: 32px; height: 32px;
     border-radius: 999px;
-    border: 1.5px solid #D8D3C8;
-    background: rgba(255,255,255,0.6);
+    border: none;
+    background: transparent;
     cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
-    color: #1C1C1E;
-    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+    color: #6B6B6B;
+    transition: background 0.15s, color 0.15s, transform 0.12s;
     flex-shrink: 0;
     -webkit-tap-highlight-color: transparent;
     padding: 0;
   }
-  .icon-btn:hover { border-color: #1C1C1E; background: white; }
-  .icon-btn:active { transform: scale(0.94); }
-  .icon-btn svg { width: 15px; height: 15px; display: block; }
-  .icon-btn.muted { color: #C0BAB0; border-color: #E5E0D5; }
+  .icon-btn:hover { background: rgba(0,0,0,0.06); color: #1C1C1E; }
+  .icon-btn:active { transform: scale(0.92); }
+  .icon-btn svg { width: 16px; height: 16px; display: block; }
+  .icon-btn.muted { color: #C0BAB0; }
   .icon-btn.lang {
-    font-size: 0.66rem; font-weight: 800; letter-spacing: 0.5px;
-    width: auto; min-width: 38px; padding: 0 10px;
+    font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px;
+    width: auto; min-width: 36px; padding: 0 8px;
+    color: #1C1C1E;
   }
-  body.dark .icon-btn { background: rgba(44,44,48,0.6); border-color: #444; color: #E5E5E8; }
-  body.dark .icon-btn:hover { border-color: #E5E5E8; background: #2C2C30; }
-  body.dark .icon-btn.muted { color: #555; border-color: #333; }
+  body.dark .icon-btn { color: #A0A0A8; }
+  body.dark .icon-btn:hover { background: rgba(255,255,255,0.08); color: white; }
+  body.dark .icon-btn.lang { color: #E5E5E8; }
+  body.dark .icon-btn.muted { color: #555; }
   .toggle {
     position: relative;
     width: 64px; height: 32px;
@@ -136,28 +138,38 @@
   body.dark .arrow-btn:hover { border-color: #E5E5E8; color: #E5E5E8; }
 
   .section-tabs {
-    display: flex; gap: 4px;
+    display: flex; gap: 0;
     flex: 1; min-width: 0;
+    background: rgba(28, 28, 30, 0.05);
+    border-radius: 999px;
+    padding: 3px;
   }
   .section-tab {
-    flex: 1; padding: 7px 14px;
+    flex: 1; padding: 6px 14px;
     border: none; background: transparent;
     border-radius: 999px;
-    font-size: 0.84rem; font-weight: 600;
+    font-size: 0.82rem; font-weight: 600;
     color: #6B6B6B;
     cursor: pointer;
-    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    transition: background 0.22s cubic-bezier(0.4,0,0.2,1), color 0.18s, box-shadow 0.22s;
     letter-spacing: -0.1px;
     white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
   }
   .section-tab:hover:not(.active) { color: #1C1C1E; }
   .section-tab.active {
-    background: #1C1C1E; color: white;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    background: white;
+    color: #1C1C1E;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.04);
   }
+  body.dark .section-tabs { background: rgba(255, 255, 255, 0.06); }
   body.dark .section-tab { color: #A0A0A8; }
   body.dark .section-tab:hover:not(.active) { color: #E5E5E8; }
-  body.dark .section-tab.active { background: #E5E5E8; color: #1C1C1E; }
+  body.dark .section-tab.active {
+    background: rgba(70, 70, 76, 0.95);
+    color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
 
   .section { display: none; flex-direction: column; align-items: center; width: 100%; }
   .section.active {
@@ -674,40 +686,31 @@
     <button class="section-tab"        id="tab-word"    onclick="switchSection('word')">Words</button>
     <button class="section-tab"        id="tab-picture" onclick="switchSection('picture')">Pictures</button>
   </div>
-  <div class="topbar-toggles">
-    <button class="toggle" id="btn-audio" title="Uitspraak aan/uit" onclick="toggleAudio()">
-      <span class="toggle-thumb"></span>
-      <span class="toggle-icon toggle-icon-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
-          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
-        </svg>
-      </span>
-      <span class="toggle-icon toggle-icon-right">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-          <line x1="23" y1="9" x2="17" y2="15"/>
-          <line x1="17" y1="9" x2="23" y2="15"/>
-        </svg>
-      </span>
+  <div class="topbar-tools">
+    <button class="icon-btn lang" id="btn-lang" title="Translation language" onclick="toggleLang()">EN</button>
+    <button class="icon-btn" id="btn-audio" title="Audio on/off" onclick="toggleAudio()">
+      <svg id="ico-audio-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+      </svg>
+      <svg id="ico-audio-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+        <line x1="23" y1="9" x2="17" y2="15"/>
+        <line x1="17" y1="9" x2="23" y2="15"/>
+      </svg>
     </button>
-    <button class="toggle" id="btn-theme" title="Dark/Light mode" onclick="toggleTheme()">
-      <span class="toggle-thumb"></span>
-      <span class="toggle-icon toggle-icon-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4"/>
-          <line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-      </span>
-      <span class="toggle-icon toggle-icon-right">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-        </svg>
-      </span>
+    <button class="icon-btn" id="btn-theme" title="Dark / Light" onclick="toggleTheme()">
+      <svg id="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+      <svg id="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <circle cx="12" cy="12" r="4"/>
+        <line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
     </button>
   </div>
 </div>
@@ -992,7 +995,8 @@ const activeCat = 'Alle';
 let darkMode = localStorage.getItem('dutch-dark') === '1';
 function applyTheme() {
   document.body.classList.toggle('dark', darkMode);
-  document.getElementById('btn-theme').classList.toggle('active-right', darkMode);
+  document.getElementById('ico-moon').style.display = darkMode ? 'none' : '';
+  document.getElementById('ico-sun').style.display  = darkMode ? '' : 'none';
 }
 function toggleTheme() {
   darkMode = !darkMode;
@@ -1001,11 +1005,26 @@ function toggleTheme() {
 }
 applyTheme();
 
+// ── Translation language (en/ru) ───────────────────────────────────────────
+let lang = localStorage.getItem('dutch-lang') === 'ru' ? 'ru' : 'en';
+function applyLang() {
+  document.getElementById('btn-lang').textContent = lang.toUpperCase();
+  if (typeof refreshTranslations === 'function') refreshTranslations();
+}
+function toggleLang() {
+  lang = lang === 'en' ? 'ru' : 'en';
+  localStorage.setItem('dutch-lang', lang);
+  applyLang();
+}
+
 // ── Audio: pre-generated MP3s (neural Dutch voice) with Web Speech fallback ─
 let audioOn = localStorage.getItem('dutch-audio') !== '0'; // on by default
 function applyAudioBtn() {
-  document.getElementById('btn-audio').classList.toggle('active-right', !audioOn);
-  document.getElementById('btn-audio').title = audioOn ? 'Uitspraak uit' : 'Uitspraak aan';
+  const btn = document.getElementById('btn-audio');
+  btn.classList.toggle('muted', !audioOn);
+  btn.title = audioOn ? 'Audio off' : 'Audio on';
+  document.getElementById('ico-audio-on').style.display  = audioOn ? '' : 'none';
+  document.getElementById('ico-audio-off').style.display = audioOn ? 'none' : '';
 }
 function toggleAudio() {
   audioOn = !audioOn;
