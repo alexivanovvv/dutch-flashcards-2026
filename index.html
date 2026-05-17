@@ -335,6 +335,16 @@
     max-height: 80px;
     object-fit: contain;
   }
+  .match-item .ml-main { display: block; }
+  .match-item .ml-sub {
+    display: block;
+    font-size: 0.72rem; font-weight: 500;
+    color: #9E9E9E;
+    margin-top: 4px;
+    font-style: italic;
+    letter-spacing: 0;
+  }
+  body.dark .match-item .ml-sub { color: #888; }
   /* In picture mode, force every button (text and image) to the same fixed height */
   .match-grid.image-mode .match-item {
     height: 96px;
@@ -580,12 +590,12 @@
       0 20px 40px rgba(0,0,0,0.2);
   }
   .back-word {
-    font-family: 'Fraunces', Georgia, 'Times New Roman', serif;
-    font-size: clamp(2rem, 6vw, 3rem);
-    font-weight: 800; color: white;
-    text-align: center; line-height: 1.05;
-    letter-spacing: -1.5px; margin-bottom: 18px;
-    font-variation-settings: "opsz" 96;
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: clamp(2rem, 6.4vw, 3.1rem);
+    font-weight: 700; color: white;
+    text-align: center; line-height: 1.08;
+    letter-spacing: -0.6px; margin-bottom: 18px;
+    font-variation-settings: "opsz" 40;
   }
   .back-divider {
     width: 32px; height: 2px;
@@ -1021,11 +1031,15 @@ function refreshTranslations() {
     const c = deck[idx];
     document.getElementById('en').textContent = c[lang] || c.en;
   }
-  // Word Match: re-text every visible match item on the EN side
-  if (currentSection === 'word' && matchActive) {
+  if (matchActive) {
     for (const entry of matchActive.values()) {
-      if (entry.enEl && !entry.enEl.classList.contains('matched')) {
-        entry.enEl.textContent = entry.card[lang] || entry.card.en;
+      const tr = entry.card[lang] || entry.card.en;
+      if (currentSection === 'word' && entry.enEl && !entry.enEl.classList.contains('matched')) {
+        entry.enEl.textContent = tr;
+      }
+      if (currentSection === 'picture' && entry.nlEl && !entry.nlEl.classList.contains('matched')) {
+        const sub = entry.nlEl.querySelector('.ml-sub');
+        if (sub) sub.textContent = tr;
       }
     }
   }
@@ -1262,16 +1276,30 @@ function showOnboardingHint(section) {
   localStorage.setItem(seenKey, '1');
 }
 
+function nlText(card) {
+  return card.article ? `${card.article} ${card.word}` : card.word;
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+}
+
 function makeMatchButton(card, side) {
   const b = document.createElement('button');
   b.className = 'match-item fade-in';
   b.dataset.side = side;
   b.dataset.file = card.file;
   if (side === 'nl') {
-    b.textContent = card.article ? `${card.article} ${card.word}` : card.word;
+    if (matchStyle() === 'image') {
+      // In Picture Match, show the translation as a subtle subtitle so the
+      // language toggle is meaningful here too.
+      const tr = card[lang] || card.en;
+      b.innerHTML = `<span class="ml-main">${escapeHtml(nlText(card))}</span><span class="ml-sub">${escapeHtml(tr)}</span>`;
+    } else {
+      b.textContent = nlText(card);
+    }
   } else if (matchStyle() === 'image') {
     b.classList.add('has-image');
-    b.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${card.en}">`;
+    b.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${escapeHtml(card.en)}">`;
   } else {
     b.textContent = card[lang] || card.en;
   }
@@ -1346,10 +1374,15 @@ function placeContent(el, card, side) {
   el.dataset.file = card.file;
   el.innerHTML = '';
   if (side === 'nl') {
-    el.textContent = card.article ? `${card.article} ${card.word}` : card.word;
+    if (matchStyle() === 'image') {
+      const tr = card[lang] || card.en;
+      el.innerHTML = `<span class="ml-main">${escapeHtml(nlText(card))}</span><span class="ml-sub">${escapeHtml(tr)}</span>`;
+    } else {
+      el.textContent = nlText(card);
+    }
   } else if (matchStyle() === 'image') {
     el.classList.add('has-image');
-    el.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${card.en}">`;
+    el.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${escapeHtml(card.en)}">`;
   } else {
     el.textContent = card[lang] || card.en;
   }
