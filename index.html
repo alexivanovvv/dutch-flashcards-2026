@@ -335,16 +335,6 @@
     max-height: 80px;
     object-fit: contain;
   }
-  .match-item .ml-main { display: block; }
-  .match-item .ml-sub {
-    display: block;
-    font-size: 0.72rem; font-weight: 500;
-    color: #9E9E9E;
-    margin-top: 4px;
-    font-style: italic;
-    letter-spacing: 0;
-  }
-  body.dark .match-item .ml-sub { color: #888; }
   /* In picture mode, force every button (text and image) to the same fixed height */
   .match-grid.image-mode .match-item {
     height: 96px;
@@ -1031,15 +1021,10 @@ function refreshTranslations() {
     const c = deck[idx];
     document.getElementById('en').textContent = c[lang] || c.en;
   }
-  if (matchActive) {
+  if (matchActive && currentSection === 'word') {
     for (const entry of matchActive.values()) {
-      const tr = entry.card[lang] || entry.card.en;
-      if (currentSection === 'word' && entry.enEl && !entry.enEl.classList.contains('matched')) {
-        entry.enEl.textContent = tr;
-      }
-      if (currentSection === 'picture' && entry.nlEl && !entry.nlEl.classList.contains('matched')) {
-        const sub = entry.nlEl.querySelector('.ml-sub');
-        if (sub) sub.textContent = tr;
+      if (entry.enEl && !entry.enEl.classList.contains('matched')) {
+        entry.enEl.textContent = entry.card[lang] || entry.card.en;
       }
     }
   }
@@ -1289,14 +1274,7 @@ function makeMatchButton(card, side) {
   b.dataset.side = side;
   b.dataset.file = card.file;
   if (side === 'nl') {
-    if (matchStyle() === 'image') {
-      // In Picture Match, show the translation as a subtle subtitle so the
-      // language toggle is meaningful here too.
-      const tr = card[lang] || card.en;
-      b.innerHTML = `<span class="ml-main">${escapeHtml(nlText(card))}</span><span class="ml-sub">${escapeHtml(tr)}</span>`;
-    } else {
-      b.textContent = nlText(card);
-    }
+    b.textContent = nlText(card);
   } else if (matchStyle() === 'image') {
     b.classList.add('has-image');
     b.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${escapeHtml(card.en)}">`;
@@ -1374,12 +1352,7 @@ function placeContent(el, card, side) {
   el.dataset.file = card.file;
   el.innerHTML = '';
   if (side === 'nl') {
-    if (matchStyle() === 'image') {
-      const tr = card[lang] || card.en;
-      el.innerHTML = `<span class="ml-main">${escapeHtml(nlText(card))}</span><span class="ml-sub">${escapeHtml(tr)}</span>`;
-    } else {
-      el.textContent = nlText(card);
-    }
+    el.textContent = nlText(card);
   } else if (matchStyle() === 'image') {
     el.classList.add('has-image');
     el.innerHTML = `<img src="card_images_updated/${encodeURIComponent(card.file)}.png" alt="${escapeHtml(card.en)}">`;
