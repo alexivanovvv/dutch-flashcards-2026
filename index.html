@@ -6,7 +6,7 @@
 <title>Nederlandse Woordkaarten</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800;9..144,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,500;9..40,700&display=swap" rel="stylesheet">
 <style>
   :root {
     --accent: #22C55E;
@@ -22,9 +22,9 @@
       radial-gradient(at 20% 0%, rgba(255,255,255,0.45), transparent 55%),
       radial-gradient(at 80% 100%, rgba(255,255,255,0.30), transparent 55%),
       url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.025 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-    background-attachment: fixed;
     color: #1C1C1E;
     min-height: 100vh;
+    min-height: 100svh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -61,22 +61,29 @@
   .topbar-flag { font-size: 1.2rem; line-height: 1; flex-shrink: 0; }
   .topbar-tools { display: flex; gap: 2px; flex-shrink: 0; padding-left: 2px; }
   .icon-btn {
+    /* Touch target ≥44 visually 32 via padding (Apple HIG) */
     width: 32px; height: 32px;
     border-radius: 999px;
     border: none;
     background: transparent;
     cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
-    color: #6B6B6B;
+    color: #4F4F55;
     transition: background 0.15s, color 0.15s, transform 0.12s;
     flex-shrink: 0;
     -webkit-tap-highlight-color: transparent;
     padding: 0;
+    position: relative;
+  }
+  .icon-btn::after {
+    content: '';
+    position: absolute; inset: -6px;
+    border-radius: 999px;
   }
   .icon-btn:hover { background: rgba(0,0,0,0.06); color: #1C1C1E; }
   .icon-btn:active { transform: scale(0.92); }
   .icon-btn svg { width: 16px; height: 16px; display: block; }
-  .icon-btn.muted { color: #C0BAB0; }
+  .icon-btn.muted { color: #9E9E9E; }
   .icon-btn.lang {
     font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px;
     width: auto; min-width: 36px; padding: 0 8px;
@@ -131,11 +138,8 @@
   body.dark .toggle.active-right .toggle-icon-right {
     color: #1C1C1E;
   }
-  body.dark .card-front { background: white; box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.5); }
-  body.dark .prog-bar { background: #2C2C30; }
-  body.dark .prog-fill { background: linear-gradient(90deg, #E5E5E8 0%, var(--accent) 100%); }
-  body.dark .arrow-btn { background: #2C2C30; border-color: #444; color: #A0A0A8; }
-  body.dark .arrow-btn:hover { border-color: #E5E5E8; color: #E5E5E8; }
+  /* Dark-mode overrides for .card-front / .prog-bar / .prog-fill / .arrow-btn
+     live AFTER their base rules — see below — so source-order wins. */
 
   .section-tabs {
     display: flex; gap: 0;
@@ -224,7 +228,7 @@
   .onboarding-hint {
     position: fixed;
     left: 50%; transform: translateX(-50%);
-    bottom: 36px;
+    bottom: max(36px, calc(env(safe-area-inset-bottom) + 16px));
     background: rgba(28, 28, 30, 0.92);
     color: white;
     padding: 12px 20px;
@@ -305,15 +309,6 @@
   body.dark .modal-btn:hover { border-color: #E5E5E8; }
 
   /* ── Match game ─────────────────────────────────────────────────────────── */
-  .match-grid.flash-wrong {
-    animation: flashWrong 0.5s ease;
-  }
-  @keyframes flashWrong {
-    0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-    25%  { box-shadow: 0 0 0 14px rgba(239,68,68,0.22); }
-    100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
-  }
-
   .match-item.has-image {
     padding: 8px;
     min-height: 96px;
@@ -465,15 +460,6 @@
     40%  { transform: scale(1.06); }
     100% { transform: scale(1); }
   }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    15%      { transform: translateX(-8px); }
-    30%      { transform: translateX(8px); }
-    45%      { transform: translateX(-6px); }
-    60%      { transform: translateX(6px); }
-    75%      { transform: translateX(-3px); }
-    90%      { transform: translateX(3px); }
-  }
   .match-item.fade-in {
     animation: fadeInClean 0.3s ease;
   }
@@ -551,6 +537,11 @@
       0 20px 40px rgba(0,0,0,0.08);
     display: flex; flex-direction: column;
   }
+  body.dark .card-front { background: white; box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.3), 0 20px 40px rgba(0,0,0,0.5); }
+  body.dark .prog-bar { background: #2C2C30; }
+  body.dark .prog-fill { background: linear-gradient(90deg, #E5E5E8 0%, var(--accent) 100%); }
+  body.dark .arrow-btn { background: #2C2C30; border-color: #444; color: #A0A0A8; }
+  body.dark .arrow-btn:hover { border-color: #E5E5E8; color: #E5E5E8; }
   .img-area {
     flex: 1; display: flex;
     align-items: center; justify-content: center;
@@ -562,10 +553,11 @@
   }
   .flip-hint {
     padding: 13px; text-align: center;
-    font-size: 0.7rem; font-weight: 500;
-    color: #C0BAB0; letter-spacing: 0.3px;
+    font-size: 0.72rem; font-weight: 600;
+    color: #8A8478; letter-spacing: 0.3px;
     border-top: 1px solid #F2EEE8;
   }
+  body.dark .flip-hint { color: #6B6B72; border-top-color: rgba(255,255,255,0.06); }
 
   /* Back */
   .card-back {
@@ -615,6 +607,17 @@
     outline-offset: 2px;
   }
 
+  /* ── Honor reduced motion preference ───────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+    .card { transition: none !important; }
+  }
+
   /* ── Tablet / small desktop ────────────────────────────────────────────── */
   @media (max-width: 760px) {
     body { padding: 18px 14px 36px; }
@@ -661,7 +664,6 @@
     .match-stat { padding: 7px 12px; font-size: 0.85rem; }
     .match-reset { width: 32px; height: 32px; }
     .match-grid { gap: 6px 10px; max-width: 100%; }
-    .match-grid::before { display: none; } /* drop divider on tight phones */
     .match-item { font-size: 0.82rem; padding: 12px 8px; min-height: 48px; border-radius: 12px; }
     .match-item.has-image { min-height: 76px; padding: 6px; }
     .match-grid.image-mode .match-item { height: 76px; min-height: 76px; }
@@ -680,14 +682,14 @@
 
 <div class="topbar">
   <span class="topbar-flag" title="Nederlands">🇳🇱</span>
-  <div class="section-tabs" id="section-tabs" role="tablist">
-    <button class="section-tab active" id="tab-cards"   onclick="switchSection('cards')">Cards</button>
-    <button class="section-tab"        id="tab-word"    onclick="switchSection('word')">Words</button>
-    <button class="section-tab"        id="tab-picture" onclick="switchSection('picture')">Pictures</button>
+  <div class="section-tabs" id="section-tabs" role="tablist" aria-label="Mode">
+    <button class="section-tab active" id="tab-cards"   type="button" role="tab" aria-selected="true"  aria-controls="section-cards" onclick="switchSection('cards')">Cards</button>
+    <button class="section-tab"        id="tab-word"    type="button" role="tab" aria-selected="false" aria-controls="section-match" onclick="switchSection('word')">Words</button>
+    <button class="section-tab"        id="tab-picture" type="button" role="tab" aria-selected="false" aria-controls="section-match" onclick="switchSection('picture')">Pictures</button>
   </div>
   <div class="topbar-tools">
-    <button class="icon-btn lang" id="btn-lang" title="Translation language" onclick="toggleLang()">EN</button>
-    <button class="icon-btn" id="btn-audio" title="Audio on/off" onclick="toggleAudio()">
+    <button class="icon-btn lang" id="btn-lang" type="button" title="Translation language" aria-label="Translation language" onclick="toggleLang()">EN</button>
+    <button class="icon-btn" id="btn-audio" type="button" title="Audio on/off" aria-label="Audio" aria-pressed="true" onclick="toggleAudio()">
       <svg id="ico-audio-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
         <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
@@ -699,7 +701,7 @@
         <line x1="17" y1="9" x2="23" y2="15"/>
       </svg>
     </button>
-    <button class="icon-btn" id="btn-theme" title="Dark / Light" onclick="toggleTheme()">
+    <button class="icon-btn" id="btn-theme" type="button" title="Dark / Light" aria-label="Theme" aria-pressed="false" onclick="toggleTheme()">
       <svg id="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
       </svg>
@@ -714,18 +716,18 @@
   </div>
 </div>
 
-<div class="section active" id="section-cards">
+<div class="section active" id="section-cards" role="tabpanel" aria-labelledby="tab-cards">
   <div class="progress-row">
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
   </div>
 
   <div class="card-row">
-    <button class="arrow-btn" onclick="prevCard()">&#8592;</button>
+    <button class="arrow-btn" type="button" aria-label="Previous card" onclick="prevCard()">&#8592;</button>
     <div class="scene" onclick="flipCard()">
       <div class="card" id="card">
         <div class="card-face card-front">
-          <div class="img-area"><img id="card-img" src="" alt=""></div>
-          <div class="flip-hint">tik om te draaien</div>
+          <div class="img-area"><img id="card-img" alt="" decoding="async"></div>
+          <div class="flip-hint" id="flip-hint">tap to flip</div>
         </div>
         <div class="card-face card-back">
           <div class="back-word" id="word"></div>
@@ -736,10 +738,10 @@
         </div>
       </div>
     </div>
-    <button class="arrow-btn" onclick="nextCard()">&#8594;</button>
+    <button class="arrow-btn" type="button" aria-label="Next card" onclick="nextCard()">&#8594;</button>
   </div>
 
-  <button class="arrow-btn shuffle-icon-btn" onclick="shuffleCards()" title="Shuffle (S)">
+  <button class="arrow-btn shuffle-icon-btn" type="button" onclick="shuffleCards()" title="Shuffle (S)" aria-label="Shuffle cards">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
       <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
@@ -747,8 +749,8 @@
   </button>
 </div>
 
-<div class="section" id="section-match">
-  <div class="match-stats">
+<div class="section" id="section-match" role="tabpanel">
+  <div class="match-stats" role="status" aria-live="polite" aria-atomic="true">
     <div class="match-stat match-stat-correct" id="stat-correct-box">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="20 6 9 17 4 12"/>
@@ -763,7 +765,7 @@
       <span id="stat-wrong">0</span>
     </div>
     <div class="match-streak" id="match-streak" title="Streak">🔥 <span id="streak-num">0</span></div>
-    <button class="match-reset" onclick="resetMatchStats()" title="Reset">
+    <button class="match-reset" type="button" onclick="resetMatchStats()" title="Reset" aria-label="Reset score">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="23 4 23 10 17 10"/>
         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -774,8 +776,8 @@
   <div class="match-grid" id="match-grid"></div>
 </div>
 
-<div class="modal-overlay" id="modal-overlay" style="display:none">
-  <div class="modal-card">
+<div class="modal-overlay" id="modal-overlay" style="display:none" role="presentation">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-title" id="modal-title">Reset score?</div>
     <div class="modal-sub" id="modal-sub"></div>
     <div class="modal-actions">
@@ -996,6 +998,7 @@ function applyTheme() {
   document.body.classList.toggle('dark', darkMode);
   document.getElementById('ico-moon').style.display = darkMode ? 'none' : '';
   document.getElementById('ico-sun').style.display  = darkMode ? '' : 'none';
+  document.getElementById('btn-theme').setAttribute('aria-pressed', darkMode ? 'true' : 'false');
 }
 function toggleTheme() {
   darkMode = !darkMode;
@@ -1006,8 +1009,12 @@ applyTheme();
 
 // ── Translation language (en/ru) ───────────────────────────────────────────
 let lang = localStorage.getItem('dutch-lang') === 'ru' ? 'ru' : 'en';
+const FLIP_HINT = { en: 'tap to flip', ru: 'нажми, чтобы перевернуть' };
 function applyLang() {
   document.getElementById('btn-lang').textContent = lang.toUpperCase();
+  document.documentElement.lang = lang;
+  const hint = document.getElementById('flip-hint');
+  if (hint) hint.textContent = FLIP_HINT[lang] || FLIP_HINT.en;
   refreshTranslations();
 }
 function toggleLang() {
@@ -1036,6 +1043,7 @@ function applyAudioBtn() {
   const btn = document.getElementById('btn-audio');
   btn.classList.toggle('muted', !audioOn);
   btn.title = audioOn ? 'Audio off' : 'Audio on';
+  btn.setAttribute('aria-pressed', audioOn ? 'true' : 'false');
   document.getElementById('ico-audio-on').style.display  = audioOn ? '' : 'none';
   document.getElementById('ico-audio-off').style.display = audioOn ? 'none' : '';
 }
@@ -1079,14 +1087,22 @@ function speakFallback(text) {
   window.speechSynthesis.speak(utt);
 }
 
+let _speakToken = 0;
 function speak(card) {
   if (!audioOn) return;
   audioEl.pause();
   window.speechSynthesis.cancel();
+  const token = ++_speakToken;
+  let fired = false;
+  const fallbackOnce = (text) => {
+    if (fired || token !== _speakToken) return;
+    fired = true;
+    speakFallback(text);
+  };
   audioEl.src = `card_audio/${card.file}.mp3`;
   const text = card.article ? `${card.article} ${card.word}` : card.word;
-  audioEl.onerror = () => speakFallback(text);
-  audioEl.play().catch(() => speakFallback(text));
+  audioEl.onerror = () => fallbackOnce(text);
+  audioEl.play().catch(() => fallbackOnce(text));
 }
 
 function shuffle(arr) {
@@ -1099,13 +1115,27 @@ function shuffle(arr) {
 }
 
 function loadDeck() {
-  deck = shuffle(allCards);
+  // Persist the shuffled order so `idx` stays meaningful across reloads.
+  let order;
+  try { order = JSON.parse(localStorage.getItem('dutch-deck-order') || 'null'); }
+  catch { order = null; }
+  const byFile = new Map(allCards.map(c => [c.file, c]));
+  if (Array.isArray(order) && order.length === allCards.length && order.every(f => byFile.has(f))) {
+    deck = order.map(f => byFile.get(f));
+  } else {
+    deck = shuffle(allCards);
+    localStorage.setItem('dutch-deck-order', JSON.stringify(deck.map(c => c.file)));
+  }
   if (idx >= deck.length) idx = 0;
   showCard();
 }
 
 // ── Section switching ─────────────────────────────────────────────────────
 const VALID_SECTIONS = ['cards', 'word', 'picture'];
+// Migrate legacy 'match' value BEFORE validation
+if (localStorage.getItem('dutch-section') === 'match') {
+  localStorage.setItem('dutch-section', 'word');
+}
 let currentSection = localStorage.getItem('dutch-section') || 'cards';
 if (!VALID_SECTIONS.includes(currentSection)) currentSection = 'cards';
 
@@ -1116,9 +1146,13 @@ function switchSection(name) {
   const isMatch = (name === 'word' || name === 'picture');
   document.getElementById('section-cards').classList.toggle('active', name === 'cards');
   document.getElementById('section-match').classList.toggle('active', isMatch);
-  document.getElementById('tab-cards').classList.toggle('active',   name === 'cards');
-  document.getElementById('tab-word').classList.toggle('active',    name === 'word');
-  document.getElementById('tab-picture').classList.toggle('active', name === 'picture');
+  ['cards','word','picture'].forEach(n => {
+    const t = document.getElementById('tab-' + n);
+    const on = name === n;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+    t.setAttribute('tabindex', on ? '0' : '-1');
+  });
   if (isMatch) startMatchRound();
   showOnboardingHint(name);
 }
@@ -1157,10 +1191,17 @@ function playWrong()   { playTone(196, 0.18, 'square', 0.04); }
 
 function uniqueCardsForCategory() {
   const source = activeCat === 'Alle' ? allCards : allCards.filter(c => c.cat === activeCat);
+  // Dedupe by `word` for the match game — otherwise two identical "handschoenen"
+  // (Huishouden + Kleding) labels could show up in the same round.
   const uniq = [];
-  const seen = new Set();
+  const seenFiles = new Set();
+  const seenWords = new Set();
   for (const c of source) {
-    if (!seen.has(c.file)) { seen.add(c.file); uniq.push(c); }
+    const wkey = (c.article ? c.article + ' ' : '') + c.word;
+    if (seenFiles.has(c.file) || seenWords.has(wkey)) continue;
+    seenFiles.add(c.file);
+    seenWords.add(wkey);
+    uniq.push(c);
   }
   return uniq;
 }
@@ -1180,6 +1221,9 @@ function startMatchRound() {
   matchLocked = false;
   matchActive = new Map();
   pendingRefills = [];
+  // Cancel any in-flight refill timeouts from a previous round/section.
+  refillTimers.forEach(id => clearTimeout(id));
+  refillTimers = [];
   const uniq = uniqueCardsForCategory();
   if (uniq.length === 0) {
     document.getElementById('match-grid').innerHTML =
@@ -1337,9 +1381,10 @@ function updateStreakBadge() {
   badge.classList.toggle('show', matchStreak >= 3);
 }
 
+const capDisplay = n => n >= 1000 ? '999+' : String(n);
 function updateMatchStats() {
-  document.getElementById('stat-correct').textContent = correctCount;
-  document.getElementById('stat-wrong').textContent   = wrongCount;
+  document.getElementById('stat-correct').textContent = capDisplay(correctCount);
+  document.getElementById('stat-wrong').textContent   = capDisplay(wrongCount);
   localStorage.setItem('dutch-correct', String(correctCount));
   localStorage.setItem('dutch-wrong',   String(wrongCount));
   updateStreakBadge();
@@ -1371,12 +1416,19 @@ function revealClean(el, delay = 0) {
 // ── Batched refill: hold matched slots empty until N pairs accumulate ─────
 const REFILL_BATCH = 2;
 let pendingRefills = [];
+let refillTimers = [];
 
 function queueRefill(file) {
   pendingRefills.push(file);
   if (pendingRefills.length >= REFILL_BATCH) {
     const batch = pendingRefills.splice(0, pendingRefills.length);
-    batch.forEach((f, i) => setTimeout(() => simpleRefill(f), i * 120));
+    batch.forEach((f, i) => {
+      const id = setTimeout(() => {
+        refillTimers = refillTimers.filter(x => x !== id);
+        simpleRefill(f);
+      }, i * 120);
+      refillTimers.push(id);
+    });
   }
 }
 
@@ -1465,13 +1517,6 @@ function bumpStatStrong(id) {
   setTimeout(() => el.classList.remove('bump-strong'), 350);
 }
 
-function flashGridWrong() {
-  const grid = document.getElementById('match-grid');
-  grid.classList.remove('flash-wrong');
-  void grid.offsetWidth;
-  grid.classList.add('flash-wrong');
-  setTimeout(() => grid.classList.remove('flash-wrong'), 520);
-}
 
 function showCard() {
   const c = deck[idx];
@@ -1509,7 +1554,11 @@ function navigate(newIdx) {
 }
 function nextCard() { navigate((idx + 1) % deck.length); }
 function prevCard() { navigate((idx - 1 + deck.length) % deck.length); }
-function shuffleCards() { deck = shuffle(deck); navigate(0); }
+function shuffleCards() {
+  deck = shuffle(deck);
+  localStorage.setItem('dutch-deck-order', JSON.stringify(deck.map(c => c.file)));
+  navigate(0);
+}
 
 document.addEventListener('keydown', e => {
   if (currentSection !== 'cards') return;
@@ -1520,13 +1569,15 @@ document.addEventListener('keydown', e => {
 });
 
 loadDeck();
-// Migrate older saved value 'match' → 'word'
-if (localStorage.getItem('dutch-section') === 'match') currentSection = 'word';
 switchSection(currentSection);
 applyLang();
 
-// Preload every card image so flashcard flips and Picture Match feel instant
+// Preload card images, but skip on slow connections / data-saver mode.
 function preloadAllImages() {
+  const conn = navigator.connection || {};
+  if (conn.saveData) return;
+  const slow = conn.effectiveType && /(^|-)2g$|^slow-2g$/.test(conn.effectiveType);
+  if (slow) return;
   const seen = new Set();
   for (const c of allCards) {
     if (seen.has(c.file)) continue;
